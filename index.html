@@ -1,327 +1,496 @@
 <!doctype html>
-<html lang="km" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
-  <title>OmniStudio — Khmer AI Studio</title>
+  <meta name="theme-color" content="#10120f">
+  <title>OmniStudio v31.1 — AI workspace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Battambang:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+  <script src="https://js.puter.com/v2/"></script>
   <style>
     :root {
       color-scheme: dark;
-      --bg-main: #000;
-      --bg-sidebar: #0a0a0a;
-      --bg-panel: #121212;
-      --bg-hover: #1f1f1f;
-      --bg-input: #141414;
-      --border: #2a2a2a;
-      --text-main: #fff;
-      --text-muted: #888;
-      --accent: #a3e635;
-      --accent-hover: #84cc16;
-      --accent-glow: rgba(163, 230, 53, .18);
-      --danger: #ef4444;
-      --success: #a3e635;
-      --warn: #f59e0b;
-      --shadow: 0 18px 45px rgba(0, 0, 0, .38);
-      --font-main: 'Battambang', 'Inter', sans-serif;
+      --bg: #10120f;
+      --sidebar: #151713;
+      --surface: #1b1e19;
+      --surface-raised: #22251f;
+      --surface-hover: #292d25;
+      --input: #171a15;
+      --border: #2b3028;
+      --text: #f1f3eb;
+      --muted: #92988b;
+      --subtle: #697064;
+      --accent: #b9f36b;
+      --accent-strong: #a6e653;
+      --accent-wash: rgba(185, 243, 107, .10);
+      --danger: #f17b72;
+      --warning: #f0c36b;
+      --success: #a7e76e;
+      --shadow: 0 20px 65px rgba(0, 0, 0, .27);
+      --font: 'DM Sans', 'Battambang', sans-serif;
+      --heading: 'Manrope', 'Battambang', sans-serif;
     }
     [data-theme="light"] {
       color-scheme: light;
-      --bg-main: #fff;
-      --bg-sidebar: #f8f9fa;
-      --bg-panel: #f1f3f5;
-      --bg-hover: #e9ecef;
-      --bg-input: #fff;
-      --border: #dee2e6;
-      --text-main: #111;
-      --text-muted: #6c757d;
-      --shadow: 0 18px 45px rgba(0, 0, 0, .08);
+      --bg: #f5f6f2;
+      --sidebar: #ecefe8;
+      --surface: #fff;
+      --surface-raised: #f8f9f6;
+      --surface-hover: #e9ede4;
+      --input: #fff;
+      --border: #dce1d6;
+      --text: #20231e;
+      --muted: #697064;
+      --subtle: #899083;
+      --accent: #568e19;
+      --accent-strong: #477915;
+      --accent-wash: rgba(86, 142, 25, .10);
+      --danger: #c44239;
+      --warning: #a87517;
+      --success: #477915;
+      --shadow: 0 20px 65px rgba(35, 45, 26, .10);
     }
     * { box-sizing: border-box; }
-    body { margin: 0; height: 100dvh; overflow: hidden; display: flex; color: var(--text-main); background: var(--bg-main); font-family: var(--font-main); -webkit-font-smoothing: antialiased; }
-    button, input, textarea, select { font: inherit; }
+    html, body { min-height: 100%; }
+    body { margin: 0; height: 100dvh; overflow: hidden; display: flex; color: var(--text); background: var(--bg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+    button, input, select, textarea { font: inherit; }
     button { color: inherit; }
-    .app-sidebar { width: 270px; flex: 0 0 270px; display: flex; flex-direction: column; background: var(--bg-sidebar); border-right: 1px solid var(--border); transition: transform .25s ease; z-index: 10; }
-    .brand { min-height: 68px; padding: 16px 18px; display: flex; align-items: center; gap: 10px; font-weight: 700; white-space: nowrap; }
-    .brand-mark { color: var(--accent); font-size: 20px; filter: drop-shadow(0 0 8px var(--accent-glow)); }
-    .version-tag { padding: 2px 7px; border-radius: 5px; color: #000; background: var(--accent); font: 700 10px 'Inter', sans-serif; }
-    .new-chat { margin: 0 14px 12px; padding: 11px 13px; display: flex; gap: 10px; align-items: center; text-align: left; cursor: pointer; border: 1px solid var(--border); border-radius: 10px; color: var(--text-main); background: transparent; transition: .2s; }
-    .new-chat:hover, .nav-button:hover, .history-entry:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-hover); }
-    .sidebar-search { position: relative; margin: 0 14px 10px; }
-    .sidebar-search i { position: absolute; left: 11px; top: 50%; color: var(--text-muted); transform: translateY(-50%); font-size: 12px; }
-    .sidebar-search input { width: 100%; padding: 8px 10px 8px 31px; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; background: var(--bg-main); outline: none; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex="0"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .app-sidebar { width: 252px; flex: 0 0 252px; display: flex; flex-direction: column; background: var(--sidebar); border-right: 1px solid var(--border); z-index: 20; transition: transform .25s ease; }
+    .brand { min-height: 72px; padding: 17px 19px; display: flex; align-items: center; gap: 10px; font: 800 16px var(--heading); letter-spacing: -.04em; }
+    .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 10px; color: #17200f; background: var(--accent); box-shadow: 0 5px 18px rgba(185, 243, 107, .14); font-size: 15px; }
+    .version-tag { margin-left: auto; padding: 3px 7px; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font: 700 9px var(--font); letter-spacing: .06em; }
+    .new-chat { margin: 0 13px 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 9px; color: var(--text); background: var(--surface); cursor: pointer; text-align: left; font-size: 12px; font-weight: 600; transition: .18s; }
+    .new-chat i { color: var(--accent); }
+    .new-chat:hover, .nav-button:hover, .history-entry:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); background: var(--surface-hover); }
+    .sidebar-scroll { flex: 1; overflow: auto; padding: 0 9px 14px; scrollbar-width: thin; }
+    .section-label { padding: 12px 10px 7px; color: var(--subtle); font: 700 9px var(--font); letter-spacing: .12em; text-transform: uppercase; }
+    .nav-button { width: 100%; min-height: 37px; display: flex; align-items: center; gap: 11px; padding: 8px 10px; border: 1px solid transparent; border-radius: 8px; color: var(--muted); background: transparent; cursor: pointer; text-align: left; font-size: 12px; transition: .18s; }
+    .nav-button i { width: 16px; text-align: center; font-size: 12px; }
+    .nav-button.active { color: var(--accent); background: var(--accent-wash); border-color: color-mix(in srgb, var(--accent) 18%, transparent); }
+    .nav-count { margin-left: auto; color: var(--subtle); font-size: 10px; }
+    .sidebar-search { position: relative; margin: 4px 2px 7px; }
+    .sidebar-search i { position: absolute; top: 50%; left: 11px; color: var(--subtle); transform: translateY(-50%); font-size: 11px; }
+    .sidebar-search input { width: 100%; padding: 8px 9px 8px 30px; border: 1px solid var(--border); border-radius: 8px; outline: 0; color: var(--text); background: var(--bg); font-size: 11px; }
     .sidebar-search input:focus { border-color: var(--accent); }
-    .sidebar-scroll { flex: 1; overflow: auto; padding: 4px 8px 12px; }
-    .section-label { padding: 12px 12px 6px; color: var(--text-muted); font: 600 10px 'Inter', sans-serif; letter-spacing: .09em; text-transform: uppercase; }
-    .nav-button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid transparent; border-radius: 9px; color: var(--text-muted); background: transparent; cursor: pointer; text-align: left; transition: .2s; }
-    .nav-button i { width: 17px; text-align: center; }
-    .nav-button.active { color: var(--accent); background: var(--bg-hover); border-left: 3px solid var(--accent); }
     .history-list { display: flex; flex-direction: column; gap: 3px; }
-    .history-entry { width: 100%; padding: 8px 10px; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 8px; color: var(--text-muted); background: transparent; cursor: pointer; text-align: left; font-size: 12px; }
-    .history-entry.active { color: var(--accent); background: var(--bg-hover); }
-    .history-title { overflow: hidden; flex: 1; white-space: nowrap; text-overflow: ellipsis; }
-    .history-delete { padding: 4px; border: 0; color: var(--text-muted); background: none; cursor: pointer; opacity: 0; }
-    .history-entry:hover .history-delete { opacity: 1; }
+    .history-entry { width: 100%; min-width: 0; padding: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 8px; color: var(--muted); background: transparent; cursor: pointer; text-align: left; font-size: 11px; }
+    .history-entry.active { color: var(--accent); background: var(--surface-hover); }
+    .history-title { min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .history-delete { width: 22px; height: 22px; display: grid; place-items: center; border: 0; border-radius: 5px; color: var(--subtle); background: transparent; cursor: pointer; opacity: 0; }
+    .history-entry:hover .history-delete, .history-delete:focus-visible { opacity: 1; }
     .history-delete:hover { color: var(--danger); }
-    .sidebar-footer { padding: 10px; border-top: 1px solid var(--border); }
-    .privacy-note { padding: 10px; color: var(--text-muted); font-size: 10px; line-height: 1.6; }
-    .privacy-note i { margin-right: 4px; color: var(--accent); }
+    .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
+    .local-card { padding: 10px; display: flex; align-items: center; gap: 9px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    .local-avatar { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 9px; color: var(--accent); background: var(--accent-wash); font-size: 12px; }
+    .local-copy { min-width: 0; flex: 1; }
+    .local-copy strong, .local-copy small { display: block; }
+    .local-copy strong { font-size: 10px; }
+    .local-copy small { margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .icon-control { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; border: 1px solid transparent; border-radius: 8px; color: var(--muted); background: transparent; cursor: pointer; transition: .18s; }
+    .icon-control:hover, .icon-control.active { border-color: var(--border); color: var(--accent); background: var(--surface-hover); }
     .main-shell { min-width: 0; flex: 1; display: flex; flex-direction: column; position: relative; }
-    .topbar { height: 58px; flex: 0 0 58px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-main); }
-    .topbar-start, .topbar-actions { display: flex; align-items: center; gap: 10px; }
-    .icon-control { width: 34px; height: 34px; display: inline-flex; justify-content: center; align-items: center; border: 0; border-radius: 8px; color: var(--text-muted); background: transparent; cursor: pointer; transition: .2s; }
-    .icon-control:hover, .icon-control.active { color: var(--accent); background: var(--bg-hover); }
-    .mode-label { font-weight: 600; }
-    .model-pill { padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; color: var(--accent); background: var(--bg-panel); font: 600 11px 'Inter', sans-serif; }
-    .status-pill { display: inline-flex; align-items: center; gap: 7px; color: var(--text-muted); font-size: 11px; }
+    .topbar { height: 62px; flex: 0 0 62px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 94%, transparent); }
+    .topbar-start, .topbar-actions { display: flex; align-items: center; gap: 9px; }
+    .mode-title { font: 700 13px var(--heading); letter-spacing: -.015em; }
+    .topbar-divider { width: 1px; height: 22px; margin: 0 2px; background: var(--border); }
+    .compact-select { max-width: 188px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); background: var(--surface); font-size: 10px; }
+    .compact-select.persona-select { max-width: 125px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; white-space: nowrap; }
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
-    .status-pill.busy .status-dot { background: var(--warn); animation: pulse 1s infinite; }
-    .workspace { min-height: 0; flex: 1; overflow: auto; padding: 26px 22px; scroll-behavior: smooth; }
-    .workspace-inner { width: min(860px, 100%); margin: 0 auto; }
-    .welcome { min-height: min(65vh, 620px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px; text-align: center; }
-    .welcome-mark { color: var(--accent); font-size: 52px; filter: drop-shadow(0 0 26px var(--accent-glow)); }
-    .welcome h1 { margin: 0; font: 700 clamp(24px, 4vw, 34px) 'Inter', var(--font-main); letter-spacing: -.04em; }
-    .welcome-copy { max-width: 600px; margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
-    .suggestion-grid { width: min(680px, 100%); display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 10px; }
-    .suggestion { padding: 12px; display: flex; gap: 10px; text-align: left; align-items: center; border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); background: var(--bg-panel); cursor: pointer; transition: .2s; }
-    .suggestion:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
-    .suggestion i { width: 18px; color: var(--accent); text-align: center; }
-    .suggestion span { font-size: 12px; }
-    .chat-list { display: flex; flex-direction: column; gap: 18px; padding-bottom: 32px; }
+    .status-pill.busy .status-dot { background: var(--warning); animation: pulse 1s infinite; }
+    .workspace { min-height: 0; flex: 1; overflow: auto; padding: 25px 24px; scroll-behavior: smooth; }
+    .workspace-inner { width: min(970px, 100%); min-height: 100%; margin: 0 auto; }
+    .welcome { min-height: min(68vh, 690px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 18px; text-align: center; }
+    .welcome-mark { width: 54px; height: 54px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border)); border-radius: 18px; color: var(--accent); background: var(--accent-wash); font-size: 22px; }
+    .eyebrow { color: var(--accent); font: 700 9px var(--font); letter-spacing: .17em; text-transform: uppercase; }
+    .welcome h1 { margin: 0; font: 800 clamp(28px, 4vw, 42px) var(--heading); letter-spacing: -.06em; line-height: 1.15; }
+    .welcome-copy { max-width: 560px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+    .suggestion-grid { width: min(680px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 12px; }
+    .suggestion { min-height: 61px; padding: 11px 13px; display: flex; align-items: center; gap: 11px; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); background: var(--surface); cursor: pointer; text-align: left; transition: .18s; }
+    .suggestion:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); color: var(--text); background: var(--surface-hover); transform: translateY(-1px); }
+    .suggestion i { width: 20px; color: var(--accent); text-align: center; }
+    .suggestion span { font-size: 11px; font-weight: 600; }
+    .chat-list { display: flex; flex-direction: column; gap: 20px; padding: 20px 0 38px; }
     .message { display: flex; align-items: flex-start; gap: 11px; animation: appear .2s ease; }
     .message.user { flex-direction: row-reverse; }
-    .message-avatar { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 9px; color: #000; background: var(--accent); font-size: 13px; }
-    .message.user .message-avatar { color: var(--text-main); background: var(--bg-hover); }
+    .message-avatar { width: 30px; height: 30px; flex: 0 0 30px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 9px; color: var(--accent); background: var(--surface-raised); font-size: 11px; }
+    .message.user .message-avatar { color: var(--muted); background: var(--surface-hover); }
     .message-column { min-width: 0; max-width: min(86%, 760px); }
-    .message-bubble { padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-panel); overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.85; font-size: 14px; }
-    .message.user .message-bubble { border-color: transparent; background: var(--bg-hover); }
+    .message-bubble { padding: 11px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.8; font-size: 13px; }
+    .message.user .message-bubble { border-color: transparent; background: var(--surface-raised); }
     .message-bubble.markdown { white-space: normal; }
-    .message-bubble.markdown > :first-child { margin-top: 0; }
-    .message-bubble.markdown > :last-child { margin-bottom: 0; }
-    .message-bubble.markdown p, .message-bubble.markdown ul, .message-bubble.markdown ol, .message-bubble.markdown blockquote, .message-bubble.markdown pre, .message-bubble.markdown table { margin: 10px 0; }
-    .message-bubble.markdown ul, .message-bubble.markdown ol { padding-left: 24px; }
-    .message-bubble.markdown li + li { margin-top: 4px; }
-    .message-bubble.markdown h1, .message-bubble.markdown h2, .message-bubble.markdown h3 { margin: 16px 0 8px; color: var(--accent); line-height: 1.35; }
-    .message-bubble.markdown h1 { font-size: 1.4em; }
-    .message-bubble.markdown h2 { font-size: 1.2em; }
-    .message-bubble.markdown h3 { font-size: 1.08em; }
-    .message-bubble.markdown a { color: var(--accent); overflow-wrap: anywhere; }
-    .message-bubble.markdown blockquote { padding: 8px 12px; border-left: 3px solid var(--accent); color: var(--text-muted); background: var(--bg-main); }
-    .message-bubble.markdown pre { overflow-x: auto; padding: 13px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-main); }
-    .message-bubble.markdown code { padding: 2px 5px; border-radius: 4px; color: var(--accent); background: var(--bg-main); font: .92em ui-monospace, SFMono-Regular, Consolas, monospace; }
-    .message-bubble.markdown pre code { padding: 0; color: var(--text-main); background: transparent; }
-    .message-bubble.markdown table { width: 100%; display: block; overflow-x: auto; border-collapse: collapse; font-size: 12px; }
-    .message-bubble.markdown th, .message-bubble.markdown td { padding: 7px 9px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
-    .message-bubble.markdown th { color: var(--accent); background: var(--bg-main); }
-    .message-bubble.markdown hr { margin: 14px 0; border: 0; border-top: 1px solid var(--border); }
-    .message-actions { display: flex; gap: 5px; margin: 5px 0 0 2px; opacity: .72; }
-    .message-actions button { padding: 4px 7px; border: 0; border-radius: 5px; color: var(--text-muted); background: transparent; cursor: pointer; font-size: 11px; }
-    .message-actions button:hover { color: var(--accent); background: var(--bg-hover); }
-    .input-dock { padding: 8px 20px 14px; display: flex; flex-direction: column; align-items: center; border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent); background: linear-gradient(180deg, transparent, var(--bg-main) 18%); }
+    .message-bubble.markdown > :first-child, .rich-output > :first-child { margin-top: 0; }
+    .message-bubble.markdown > :last-child, .rich-output > :last-child { margin-bottom: 0; }
+    .message-bubble.markdown p, .message-bubble.markdown ul, .message-bubble.markdown ol, .message-bubble.markdown blockquote, .message-bubble.markdown pre, .message-bubble.markdown table, .rich-output p, .rich-output ul, .rich-output ol, .rich-output blockquote, .rich-output pre, .rich-output table { margin: 10px 0; }
+    .message-bubble.markdown ul, .message-bubble.markdown ol, .rich-output ul, .rich-output ol { padding-left: 22px; }
+    .message-bubble.markdown li + li, .rich-output li + li { margin-top: 4px; }
+    .message-bubble.markdown h1, .message-bubble.markdown h2, .message-bubble.markdown h3, .rich-output h1, .rich-output h2, .rich-output h3 { margin: 16px 0 8px; color: var(--accent); font: 700 1.1em var(--heading); line-height: 1.4; }
+    .message-bubble.markdown a, .rich-output a { color: var(--accent); overflow-wrap: anywhere; }
+    .message-bubble.markdown blockquote, .rich-output blockquote { padding: 8px 12px; border-left: 3px solid var(--accent); color: var(--muted); background: var(--bg); }
+    .message-bubble.markdown pre, .rich-output pre { overflow: auto; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+    .message-bubble.markdown code, .rich-output code { padding: 2px 5px; border-radius: 4px; color: var(--accent); background: var(--bg); font: .92em ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .message-bubble.markdown pre code, .rich-output pre code { padding: 0; color: var(--text); background: transparent; }
+    .message-bubble.markdown table, .rich-output table { width: 100%; display: block; overflow-x: auto; border-collapse: collapse; font-size: 11px; }
+    .message-bubble.markdown th, .message-bubble.markdown td, .rich-output th, .rich-output td { padding: 7px 9px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .message-bubble.markdown th, .rich-output th { color: var(--accent); background: var(--bg); }
+    .message-actions { display: flex; flex-wrap: wrap; gap: 5px; margin: 5px 0 0 2px; }
+    .message-actions button { padding: 4px 7px; border: 0; border-radius: 5px; color: var(--subtle); background: transparent; cursor: pointer; font-size: 10px; }
+    .message-actions button:hover { color: var(--accent); background: var(--surface-hover); }
+    .input-dock { padding: 8px 20px 12px; display: flex; flex-direction: column; align-items: center; border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent); background: linear-gradient(180deg, transparent, var(--bg) 18%); }
     .quick-prompts { width: min(860px, 100%); display: flex; gap: 7px; overflow: auto; padding: 0 0 8px; scrollbar-width: none; }
     .quick-prompts::-webkit-scrollbar { display: none; }
-    .quick-chip { padding: 6px 11px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; border: 1px solid var(--border); border-radius: 20px; color: var(--text-muted); background: var(--bg-panel); cursor: pointer; font-size: 11px; }
+    .quick-chip { padding: 6px 10px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); background: var(--surface); cursor: pointer; font-size: 10px; }
     .quick-chip:hover { color: var(--accent); border-color: var(--accent); }
-    .composer { width: min(860px, 100%); padding: 9px; border: 1px solid var(--border); border-radius: 15px; background: var(--bg-input); box-shadow: var(--shadow); transition: .2s; }
-    .composer:focus-within { border-color: var(--accent); box-shadow: 0 0 18px var(--accent-glow); }
-    .composer textarea { width: 100%; min-height: 48px; max-height: 180px; padding: 10px; display: block; resize: none; outline: 0; border: 0; color: var(--text-main); background: transparent; font-size: 15px; line-height: 1.7; }
-    .composer textarea::placeholder { color: var(--text-muted); }
-    .composer-tools { display: flex; align-items: center; gap: 7px; padding: 7px 3px 2px; border-top: 1px solid var(--border); }
-    .tool-select { max-width: 150px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; outline: 0; color: var(--text-muted); background: var(--bg-main); font-size: 11px; }
+    .composer { width: min(860px, 100%); padding: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--input); box-shadow: var(--shadow); transition: .18s; }
+    .composer:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); }
+    .composer textarea { width: 100%; min-height: 43px; max-height: 160px; padding: 9px; display: block; resize: none; outline: 0; border: 0; color: var(--text); background: transparent; font-size: 13px; line-height: 1.7; }
+    .composer textarea::placeholder { color: var(--subtle); }
+    .composer-tools { display: flex; align-items: center; gap: 6px; padding: 6px 2px 1px; border-top: 1px solid var(--border); }
     .tool-spacer { flex: 1; }
-    .send-button { width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 11px; color: #000; background: var(--accent); cursor: pointer; transition: .2s; }
-    .send-button:hover { background: var(--accent-hover); transform: scale(1.04); }
-    .send-button:disabled { opacity: .55; cursor: wait; }
+    .send-button { width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 10px; color: #18200f; background: var(--accent); cursor: pointer; transition: .18s; }
+    .send-button:hover { background: var(--accent-strong); transform: scale(1.03); }
     .send-button.stop { color: #fff; background: var(--danger); }
-    .composer-hint { margin-top: 8px; color: var(--text-muted); font-size: 10px; }
-    .business-panel, .media-panel { width: min(860px, 100%); margin: 20px auto; padding: 22px; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-panel); box-shadow: var(--shadow); }
-    .panel-heading { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; color: var(--accent); font: 700 20px 'Inter', var(--font-main); }
-    .panel-description { margin: 0 0 20px; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
-    .business-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .send-button:disabled { opacity: .6; cursor: wait; }
+    .composer-hint { margin-top: 7px; color: var(--subtle); font-size: 9px; text-align: center; }
+    .page-panel { width: min(900px, 100%); margin: 16px auto; padding: 23px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface); box-shadow: var(--shadow); }
+    .panel-heading { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font: 700 19px var(--heading); letter-spacing: -.035em; }
+    .panel-heading i { color: var(--accent); font-size: 16px; }
+    .panel-description { max-width: 700px; margin: 0 0 19px; color: var(--muted); font-size: 12px; line-height: 1.75; }
+    .panel-topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; }
+    .business-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .field { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
     .field.full { grid-column: 1 / -1; }
-    .field label { color: var(--text-muted); font-size: 12px; }
-    .field input, .field select, .field textarea { width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px; outline: 0; color: var(--text-main); background: var(--bg-main); font-size: 13px; }
+    .field label { color: var(--muted); font-size: 10px; font-weight: 600; }
+    .field input, .field select, .field textarea { width: 100%; min-height: 38px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; outline: 0; color: var(--text); background: var(--bg); font-size: 11px; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
-    .field textarea { resize: vertical; min-height: 82px; }
-    .primary-action { padding: 10px 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 9px; color: #000; background: var(--accent); cursor: pointer; font-size: 12px; font-weight: 700; }
-    .primary-action:hover { background: var(--accent-hover); }
-    .panel-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
-    .secondary-action { padding: 9px 13px; border: 1px solid var(--border); border-radius: 9px; color: var(--text-main); background: transparent; cursor: pointer; font-size: 12px; }
-    .media-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .field textarea { min-height: 74px; resize: vertical; }
+    .primary-action, .secondary-action { min-height: 36px; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid transparent; border-radius: 8px; cursor: pointer; font-size: 10px; font-weight: 700; transition: .18s; }
+    .primary-action { color: #18200f; background: var(--accent); }
+    .primary-action:hover { background: var(--accent-strong); }
+    .primary-action:disabled { opacity: .55; cursor: wait; }
+    .secondary-action { border-color: var(--border); color: var(--text); background: var(--surface); }
+    .secondary-action:hover { border-color: var(--accent); color: var(--accent); }
+    .panel-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 15px; }
+    .outline-card, .result-card, .settings-card, .library-card, .audio-card, .media-card { padding: 17px; border: 1px solid var(--border); border-radius: 11px; background: var(--bg); }
+    .outline-card { margin-top: 15px; }
+    .outline-list { margin: 12px 0 0; padding-left: 19px; color: var(--muted); font-size: 11px; line-height: 1.8; }
+    .drafts-heading { margin: 24px 0 9px; color: var(--muted); font: 700 10px var(--font); letter-spacing: .1em; text-transform: uppercase; }
+    .draft-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+    .draft-item { padding: 10px; display: flex; align-items: flex-start; gap: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); background: var(--bg); cursor: pointer; text-align: left; }
+    .draft-item:hover { border-color: var(--accent); color: var(--text); }
+    .draft-item i { margin-top: 2px; color: var(--accent); }
+    .draft-copy { min-width: 0; }
+    .draft-copy strong, .draft-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .draft-copy strong { color: var(--text); font-size: 10px; }
+    .draft-copy small { margin-top: 4px; font-size: 9px; }
+    .result-card { margin-top: 14px; }
+    .result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .result-head h3 { margin: 0; font: 700 13px var(--heading); }
+    .result-status { color: var(--muted); font-size: 10px; }
+    .rich-output { color: var(--text); overflow-wrap: anywhere; font-size: 12px; line-height: 1.8; }
     .media-controls { display: flex; flex-wrap: wrap; gap: 8px; }
-    .media-controls select { padding: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); background: var(--bg-main); }
-    .generated-image { display: block; width: 100%; max-height: 66vh; object-fit: contain; margin: 18px auto 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-main); }
-    .media-placeholder { min-height: 330px; display: grid; place-items: center; color: var(--text-muted); text-align: center; }
-    .media-placeholder i { display: block; margin-bottom: 12px; color: var(--accent); font-size: 40px; opacity: .55; }
-    .media-error { color: var(--danger); font-size: 12px; }
-    .gallery-heading { margin: 0 0 15px; color: var(--accent); font: 700 20px 'Inter', var(--font-main); }
-    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
-    .gallery-card { aspect-ratio: 1; position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-main); cursor: pointer; }
-    .gallery-card img { width: 100%; height: 100%; display: block; object-fit: cover; }
-    .gallery-remove { width: 30px; height: 30px; position: absolute; top: 8px; right: 8px; display: grid; place-items: center; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .72); cursor: pointer; opacity: 0; }
-    .gallery-card:hover .gallery-remove { opacity: 1; }
-    .gallery-empty { grid-column: 1 / -1; padding: 50px 10px; color: var(--text-muted); text-align: center; }
-    .lightbox { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 32px; background: rgba(0, 0, 0, .92); z-index: 50; }
+    .media-controls select { padding: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--bg); font-size: 10px; }
+    .generated-image { display: block; width: 100%; max-height: 62vh; object-fit: contain; margin: 15px auto 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+    .media-placeholder { min-height: 280px; display: grid; place-items: center; margin-top: 12px; border: 1px dashed var(--border); border-radius: 11px; color: var(--muted); background: var(--bg); text-align: center; font-size: 11px; }
+    .media-placeholder i { display: block; margin-bottom: 12px; color: var(--accent); font-size: 30px; opacity: .7; }
+    .media-error { color: var(--danger); font-size: 11px; }
+    .note { margin: 11px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.7; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 11px; }
+    .gallery-card { aspect-ratio: 1; position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+    .gallery-card img { width: 100%; height: 100%; display: block; object-fit: cover; cursor: pointer; }
+    .gallery-caption { position: absolute; right: 0; bottom: 0; left: 0; padding: 26px 9px 8px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.78)); font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+    .gallery-remove { width: 28px; height: 28px; position: absolute; top: 7px; right: 7px; display: grid; place-items: center; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .72); cursor: pointer; opacity: 0; }
+    .gallery-card:hover .gallery-remove, .gallery-remove:focus-visible { opacity: 1; }
+    .empty-state { grid-column: 1 / -1; padding: 42px 12px; color: var(--muted); text-align: center; font-size: 11px; }
+    .empty-state i { display: block; margin-bottom: 11px; color: var(--accent); font-size: 24px; }
+    .library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .library-card { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .library-card i { color: var(--accent); font-size: 15px; }
+    .library-card h3 { margin: 0; font: 700 12px var(--heading); }
+    .library-card p { min-height: 36px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+    .library-card .secondary-action { margin-top: auto; }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .settings-card h3 { margin: 0 0 5px; font: 700 11px var(--heading); }
+    .settings-card p { margin: 0 0 12px; color: var(--muted); font-size: 10px; line-height: 1.65; }
+    .settings-card select { width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 10px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 18px; }
+    .stat-card { padding: 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
+    .stat-card span { display: block; color: var(--muted); font-size: 9px; }
+    .stat-card strong { display: block; margin-top: 7px; color: var(--accent); font: 700 20px var(--heading); }
+    .audio-card textarea { width: 100%; min-height: 150px; padding: 12px; resize: vertical; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 12px; line-height: 1.7; }
+    .audio-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 11px; }
+    .audio-tools select { max-width: 220px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 10px; }
+    .lightbox { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 28px; background: rgba(0, 0, 0, .9); z-index: 60; }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: min(100%, 1200px); max-height: 92vh; object-fit: contain; border-radius: 8px; }
-    .lightbox-close { position: absolute; top: 18px; right: 22px; width: 40px; height: 40px; border: 0; border-radius: 50%; color: #fff; background: var(--bg-hover); cursor: pointer; }
-    .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 80; display: flex; flex-direction: column; gap: 8px; }
-    .toast { max-width: min(380px, calc(100vw - 40px)); padding: 11px 14px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 9px; color: var(--text-main); background: var(--bg-panel); box-shadow: var(--shadow); font-size: 12px; animation: appear .2s ease; }
+    .lightbox-close { position: absolute; top: 16px; right: 18px; width: 40px; height: 40px; border: 0; border-radius: 50%; color: #fff; background: #292d25; cursor: pointer; }
+    .toast-stack { position: fixed; right: 18px; bottom: 18px; z-index: 90; display: flex; flex-direction: column; gap: 8px; }
+    .toast { max-width: min(380px, calc(100vw - 36px)); padding: 10px 13px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; color: var(--text); background: var(--surface); box-shadow: var(--shadow); font-size: 11px; animation: appear .2s ease; }
     .toast.error { border-left-color: var(--danger); }
-    .toast.warn { border-left-color: var(--warn); }
+    .toast.warn { border-left-color: var(--warning); }
+    dialog { width: min(450px, calc(100vw - 28px)); max-height: min(75vh, 620px); padding: 0; border: 1px solid var(--border); border-radius: 14px; color: var(--text); background: var(--surface); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(0, 0, 0, .58); backdrop-filter: blur(4px); }
+    .dialog-head { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .dialog-head h2 { margin: 0; font: 700 13px var(--heading); }
+    .dialog-body { padding: 14px 16px; }
+    .command-input { width: 100%; padding: 11px; border: 1px solid var(--border); border-radius: 8px; outline: 0; color: var(--text); background: var(--bg); font-size: 12px; }
+    .command-list { max-height: 330px; overflow: auto; margin-top: 9px; }
+    .command-item { width: 100%; padding: 10px; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 8px; color: var(--muted); background: transparent; cursor: pointer; text-align: left; font-size: 11px; }
+    .command-item:hover, .command-item:focus { color: var(--accent); background: var(--surface-hover); }
+    .command-item i { width: 16px; }
     .hidden { display: none !important; }
     @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulse { 50% { opacity: .35; } }
-    @media (max-width: 768px) {
-      .app-sidebar { position: fixed; inset: 0 auto 0 0; height: 100%; width: 280px; transform: translateX(-101%); box-shadow: var(--shadow); }
-      .app-sidebar.mobile-open { transform: translateX(0); }
-      .topbar { height: 52px; flex-basis: 52px; padding: 0 10px; }
-      .topbar-actions { gap: 2px; }
+    @media (max-width: 900px) {
+      .app-sidebar { width: 230px; flex-basis: 230px; }
+      .topbar { padding: 0 14px; }
+      .workspace { padding: 19px 15px; }
       .status-pill { display: none; }
-      .workspace { padding: 16px 12px; }
-      .input-dock { padding: 6px 10px 10px; }
-      .suggestion-grid, .business-form { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .app-sidebar { position: fixed; inset: 0 auto 0 0; height: 100%; width: 275px; transform: translateX(-102%); box-shadow: var(--shadow); }
+      .app-sidebar.mobile-open { transform: translateX(0); }
+      .sidebar-scrim { position: fixed; inset: 0; z-index: 15; background: rgba(0,0,0,.46); }
+      .topbar { height: 55px; flex-basis: 55px; padding: 0 9px; gap: 5px; }
+      .topbar-start, .topbar-actions { gap: 3px; }
+      .mode-title { max-width: 100px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; }
+      .topbar-divider, .topbar-actions .status-pill, #stats-button { display: none; }
+      .compact-select { max-width: 110px; padding: 6px 5px; font-size: 9px; }
+      .compact-select.persona-select { display: none; }
+      .icon-control { width: 31px; height: 31px; }
+      .workspace { padding: 12px 10px; }
+      .input-dock { padding: 6px 9px 9px; }
+      .suggestion-grid, .business-form, .settings-grid { grid-template-columns: 1fr; }
       .field.full { grid-column: auto; }
-      .business-panel, .media-panel { padding: 16px; }
-      .tool-select { max-width: 125px; }
-      .composer textarea { font-size: 14px; }
+      .page-panel { padding: 15px; margin: 9px auto; }
+      .panel-topline { display: block; }
+      .media-controls { margin-top: 10px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .message-column { max-width: 89%; }
+      .welcome { min-height: 56vh; }
+      .welcome h1 { font-size: 30px; }
+      .suggestion { min-height: 54px; }
+      .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
 <body>
-  <aside class="app-sidebar" id="sidebar">
-    <div class="brand"><i class="fa-solid fa-cube brand-mark"></i><span>OmniStudio</span><span class="version-tag">KH</span></div>
-    <button class="new-chat" id="new-chat"><i class="fa-solid fa-plus"></i><span>សន្ទនាថ្មី</span></button>
-    <label class="sidebar-search"><i class="fa-solid fa-magnifying-glass"></i><input id="history-search" type="search" placeholder="ស្វែងរកប្រវត្តិ..."></label>
+  <aside class="app-sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="brand"><span class="brand-mark"><i class="fa-solid fa-cube"></i></span><span>OmniStudio</span><span class="version-tag">V31.1</span></div>
+    <button class="new-chat" id="new-chat" type="button"><i class="fa-solid fa-plus"></i><span>New conversation</span></button>
     <div class="sidebar-scroll">
       <div class="section-label">Workspace</div>
-      <button class="nav-button active" data-mode="chat"><i class="fa-solid fa-comments"></i>ជជែកជាមួយ AI</button>
-      <button class="nav-button" data-mode="business"><i class="fa-solid fa-briefcase"></i>ផែនការ & យុទ្ធសាស្ត្រ</button>
-      <button class="nav-button" data-mode="image"><i class="fa-solid fa-image"></i>បង្កើតរូបភាព FLUX</button>
-      <button class="nav-button" data-mode="gallery"><i class="fa-solid fa-photo-film"></i>វិចិត្រសាល</button>
-      <div class="section-label">ប្រវត្តិសន្ទនា</div>
+      <button class="nav-button active" type="button" data-mode="chat"><i class="fa-regular fa-comments"></i><span>Chat studio</span></button>
+      <button class="nav-button" type="button" data-mode="image"><i class="fa-regular fa-image"></i><span>Image studio</span></button>
+      <button class="nav-button" type="button" data-mode="video"><i class="fa-solid fa-clapperboard"></i><span>Video storyboard</span></button>
+      <button class="nav-button" type="button" data-mode="audio"><i class="fa-solid fa-wave-square"></i><span>Audio studio</span></button>
+      <button class="nav-button" type="button" data-mode="business"><i class="fa-solid fa-chart-pie"></i><span>Business planner</span></button>
+      <button class="nav-button" type="button" data-mode="gallery"><i class="fa-regular fa-images"></i><span>Gallery</span><span class="nav-count" id="gallery-count">0</span></button>
+      <div class="section-label">Library</div>
+      <button class="nav-button" type="button" data-mode="library"><i class="fa-regular fa-bookmark"></i><span>Prompt library</span></button>
+      <button class="nav-button" type="button" data-mode="settings"><i class="fa-solid fa-sliders"></i><span>Settings & stats</span></button>
+      <div class="section-label">Recent conversations</div>
+      <label class="sidebar-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="history-search" type="search" placeholder="Search conversations" aria-label="Search conversations"></label>
       <div class="history-list" id="history-list"></div>
     </div>
-    <div class="sidebar-footer"><div class="privacy-note"><i class="fa-solid fa-circle-info"></i>ការបង្កើតប្រើ Pollinations legacy endpoint ដោយមិនទាមទារ key។ អាចមានកំណត់អត្រា ឬផ្អាកដោយអ្នកផ្តល់សេវា។</div></div>
+    <div class="sidebar-footer">
+      <div class="local-card"><span class="local-avatar"><i class="fa-solid fa-layer-group"></i></span><span class="local-copy"><strong>Personal workspace</strong><small>Chats are saved on this device</small></span><button class="icon-control" id="settings-shortcut" aria-label="Open settings" title="Settings"><i class="fa-solid fa-gear"></i></button></div>
+    </div>
   </aside>
+  <div class="sidebar-scrim hidden" id="sidebar-scrim"></div>
 
   <main class="main-shell">
     <header class="topbar">
       <div class="topbar-start">
-        <button class="icon-control" id="sidebar-toggle" aria-label="បើកម៉ឺនុយ"><i class="fa-solid fa-bars"></i></button>
-        <span class="mode-label" id="mode-label">ជជែកជាមួយ AI</span>
-        <span class="model-pill" id="model-pill">Auto AI</span>
+        <button class="icon-control" id="sidebar-toggle" aria-label="Open navigation" title="Menu"><i class="fa-solid fa-bars"></i></button>
+        <span class="mode-title" id="mode-label">Chat studio</span>
+        <span class="topbar-divider"></span>
+        <select class="compact-select" id="model-select" aria-label="Choose AI provider and model" title="AI provider and model">
+          <option value="auto">Auto · Pollinations legacy</option>
+          <option value="pollinations-openai">Pollinations · openai</option>
+          <option value="puter-default">Puter.js · default model</option>
+        </select>
+        <select class="compact-select persona-select" id="persona-select" aria-label="Choose assistant persona" title="Assistant persona">
+          <option value="general">General</option><option value="strategist">Strategist</option><option value="creative">Creative</option><option value="coder">Coder</option><option value="analyst">Analyst</option>
+        </select>
       </div>
       <div class="topbar-actions">
         <span class="status-pill" id="status-pill"><span class="status-dot"></span><span id="status-label">Ready</span></span>
-        <button class="icon-control" id="export-chat" aria-label="នាំចេញសន្ទនា" title="ទាញយកជា Markdown"><i class="fa-solid fa-download"></i></button>
-        <button class="icon-control" id="theme-toggle" aria-label="ប្តូររចនាប័ទ្ម" title="ប្តូររចនាប័ទ្ម"><i class="fa-solid fa-sun"></i></button>
-        <button class="icon-control" id="clear-chat" aria-label="សម្អាតសន្ទនា" title="សន្ទនាថ្មី"><i class="fa-regular fa-trash-can"></i></button>
+        <button class="icon-control" id="command-button" aria-label="Open command palette" title="Command palette (Ctrl/⌘ K)"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <button class="icon-control" id="stats-button" aria-label="View workspace statistics" title="Workspace stats"><i class="fa-solid fa-chart-simple"></i></button>
+        <button class="icon-control" id="export-chat" aria-label="Export current conversation" title="Export Markdown"><i class="fa-solid fa-arrow-down-to-line"></i></button>
+        <button class="icon-control" id="theme-toggle" aria-label="Toggle color theme" title="Toggle theme"><i class="fa-regular fa-moon"></i></button>
       </div>
     </header>
 
     <section class="workspace" id="workspace">
       <div class="workspace-inner">
         <section class="welcome" id="welcome">
-          <i class="fa-solid fa-cube welcome-mark"></i>
-          <h1>OmniStudio</h1>
-          <p class="welcome-copy">ជំនួយការ AI សម្រាប់ការសន្ទនា ភាសាខ្មែរ ការធ្វើផែនការអាជីវកម្ម និងការបង្កើតរូបភាព FLUX។ សួរជាភាសាខ្មែរ ឬជ្រើសសំឡេងខ្មែរដើម្បីនិយាយជាមួយ AI។</p>
+          <span class="welcome-mark"><i class="fa-solid fa-sparkles"></i></span>
+          <span class="eyebrow">Your all-in-one creative workspace</span>
+          <h1>What would you like<br>to create today?</h1>
+          <p class="welcome-copy">Explore ideas, plan your next move, or create something new. Choose a starting point below, or ask anything in English or Khmer.</p>
           <div class="suggestion-grid">
-            <button class="suggestion" data-prompt="ជួយរៀបចំផែនការអាជីវកម្មសម្រាប់ហាងកាហ្វេតូចមួយនៅភ្នំពេញ។"><i class="fa-solid fa-briefcase"></i><span>រៀបចំផែនការអាជីវកម្ម</span></button>
-            <button class="suggestion" data-prompt="បង្កើតយុទ្ធសាស្ត្រទីផ្សាររយៈពេល ៩០ ថ្ងៃ សម្រាប់អាជីវកម្មខ្ញុំ។"><i class="fa-solid fa-chart-line"></i><span>យុទ្ធសាស្ត្រទីផ្សារ ៩០ ថ្ងៃ</span></button>
-            <button class="suggestion" data-prompt="ពន្យល់គំនិតនេះជាភាសាខ្មែរដោយមានឧទាហរណ៍៖ "><i class="fa-solid fa-lightbulb"></i><span>ពន្យល់ជាភាសាខ្មែរ</span></button>
-            <button class="suggestion" data-mode="image"><i class="fa-solid fa-wand-magic-sparkles"></i><span>បង្កើតរូបភាព FLUX</span></button>
+            <button class="suggestion" type="button" data-prompt="Help me build a practical 90-day launch plan for a small café in Phnom Penh."><i class="fa-solid fa-chart-line"></i><span>Plan a business launch</span></button>
+            <button class="suggestion" type="button" data-prompt="Explain this idea simply, with a clear example: "><i class="fa-regular fa-lightbulb"></i><span>Learn something new</span></button>
+            <button class="suggestion" type="button" data-prompt="Write a thoughtful, concise first draft of: "><i class="fa-regular fa-pen-to-square"></i><span>Draft a piece of writing</span></button>
+            <button class="suggestion" type="button" data-mode="image"><i class="fa-regular fa-image"></i><span>Create an image</span></button>
           </div>
         </section>
-        <section class="chat-list hidden" id="chat-list" aria-live="polite"></section>
+        <section class="chat-list hidden" id="chat-list" aria-live="polite" aria-label="Conversation"></section>
 
-        <section class="business-panel hidden" id="business-panel">
-          <h2 class="panel-heading"><i class="fa-solid fa-briefcase"></i>ផែនការអាជីវកម្ម និងយុទ្ធសាស្ត្រ</h2>
-          <p class="panel-description">បំពេញព័ត៌មានខាងក្រោម ដើម្បីបង្កើតផែនការជាភាសាខ្មែរ។ លទ្ធផលជាការណែនាំ AI ហើយគួរផ្ទៀងផ្ទាត់តួលេខទីផ្សារ និងចំណាយជាក់ស្តែង។</p>
+        <section class="page-panel hidden" id="image-panel">
+          <div class="panel-topline">
+            <div><h2 class="panel-heading"><i class="fa-regular fa-image"></i>Image studio</h2><p class="panel-description">Describe a scene and generate an image through the existing Pollinations image endpoint. Availability, output quality, and rate limits are controlled by that third-party service.</p></div>
+            <div class="media-controls"><select id="image-ratio" aria-label="Image aspect ratio"><option value="1024x1024">Square · 1:1</option><option value="1280x720">Landscape · 16:9</option><option value="720x1280">Portrait · 9:16</option></select></div>
+          </div>
+          <div class="media-placeholder" id="media-placeholder"><div><i class="fa-solid fa-wand-magic-sparkles"></i><span>Generated image preview will appear here</span></div></div>
+          <img class="generated-image hidden" id="generated-image" alt="Generated image preview">
+          <div class="panel-actions hidden" id="image-actions"><button class="secondary-action" type="button" id="download-image"><i class="fa-solid fa-download"></i> Download image</button><button class="secondary-action" type="button" id="copy-image-prompt"><i class="fa-regular fa-copy"></i> Copy prompt</button></div>
+        </section>
+
+        <section class="page-panel hidden" id="video-panel">
+          <h2 class="panel-heading"><i class="fa-solid fa-clapperboard"></i>Video storyboard</h2>
+          <p class="panel-description">Turn a brief into a scene-by-scene storyboard, with shot notes and image prompts. This workspace creates a written storyboard, not a rendered video file.</p>
+          <div class="result-card hidden" id="storyboard-card"><div class="result-head"><h3>Storyboard</h3><span class="result-status" id="storyboard-status"></span></div><div class="rich-output" id="storyboard-output"></div><div class="panel-actions"><button class="secondary-action" type="button" id="export-storyboard"><i class="fa-solid fa-download"></i> Export storyboard</button><button class="secondary-action" type="button" id="storyboard-to-image"><i class="fa-regular fa-image"></i> Use brief in Image studio</button></div></div>
+          <div class="media-placeholder" id="storyboard-placeholder"><div><i class="fa-solid fa-film"></i><span>Your storyboard will appear here</span></div></div>
+        </section>
+
+        <section class="page-panel hidden" id="audio-panel">
+          <h2 class="panel-heading"><i class="fa-solid fa-wave-square"></i>Audio studio</h2>
+          <p class="panel-description">Listen to text with your browser's built-in speech synthesis. Available voices depend on your device and browser; this does not create a downloadable audio file.</p>
+          <div class="audio-card"><label class="field"><span class="section-label" style="padding:0">Text to speak</span><textarea id="speech-text" maxlength="5000" placeholder="Enter text to preview as speech, or load the latest assistant response..."></textarea></label><div class="audio-tools"><select id="speech-voice" aria-label="Speech voice"></select><button class="primary-action" type="button" id="speak-button"><i class="fa-solid fa-play"></i> Play preview</button><button class="secondary-action" type="button" id="stop-speech"><i class="fa-solid fa-stop"></i> Stop</button><button class="secondary-action" type="button" id="use-latest-answer"><i class="fa-regular fa-message"></i> Use latest answer</button></div><p class="note" id="voice-note">Voice and language support varies by browser. Your device performs this preview.</p></div>
+        </section>
+
+        <section class="page-panel hidden" id="business-panel">
+          <h2 class="panel-heading"><i class="fa-solid fa-chart-pie"></i>Business planner</h2>
+          <p class="panel-description">Create a practical outline first, then ask the selected AI provider to expand it. Review estimates and assumptions before making business decisions.</p>
           <form id="business-form" class="business-form">
-            <div class="field"><label for="business-name">ឈ្មោះអាជីវកម្ម *</label><input id="business-name" name="name" required placeholder="ឧ. កាហ្វេខ្មែរ សុខា"></div>
-            <div class="field"><label for="business-industry">វិស័យ *</label><input id="business-industry" name="industry" required placeholder="ឧ. អាហារ កសិកម្ម បច្ចេកវិទ្យា"></div>
-            <div class="field"><label for="business-market">អតិថិជនគោលដៅ</label><input id="business-market" name="market" placeholder="ឧ. យុវជន បុគ្គលិកការិយាល័យ"></div>
-            <div class="field"><label for="business-budget">ថវិកាចាប់ផ្តើម</label><input id="business-budget" name="budget" placeholder="ឧ. 10,000 ដុល្លារ"></div>
-            <div class="field full"><label for="business-objective">គោលដៅ និងបញ្ហាដែលចង់ដោះស្រាយ *</label><textarea id="business-objective" name="objective" required placeholder="សរសេរគោលដៅ ចន្លោះពេល និងបញ្ហាដែលអាជីវកម្មដោះស្រាយ"></textarea></div>
-            <div class="field full"><label for="business-advantages">ចំណុចខ្លាំង ឬគូប្រកួតប្រជែង</label><textarea id="business-advantages" name="advantages" placeholder="អ្វីធ្វើឱ្យអាជីវកម្មខុសពីគេ? មានគូប្រកួតណាខ្លះ?"></textarea></div>
-            <div class="field"><label for="business-output">ប្រភេទលទ្ធផល</label><select id="business-output" name="output"><option value="business-plan">ផែនការអាជីវកម្មពេញលេញ</option><option value="strategy">យុទ្ធសាស្ត្រកំណើន ៩០ ថ្ងៃ</option><option value="marketing">យុទ្ធសាស្ត្រទីផ្សារ</option><option value="financial">ផែនការហិរញ្ញវត្ថុ និងលំហូរសាច់ប្រាក់</option><option value="swot">វិភាគ SWOT និងសកម្មភាព</option></select></div>
-            <div class="field"><label for="business-language">ភាសាចម្លើយ</label><select id="business-language" name="language"><option value="km">ខ្មែរ (Khmer)</option><option value="both">ខ្មែរ និង English</option><option value="en">English</option></select></div>
-            <div class="field full"><div class="panel-actions"><button type="button" class="secondary-action" id="business-reset">សម្អាត</button><button type="submit" class="primary-action"><i class="fa-solid fa-wand-magic-sparkles"></i>បង្កើតផែនការ</button></div></div>
+            <div class="field"><label for="business-name">Business name *</label><input id="business-name" name="name" maxlength="120" required placeholder="e.g. Riverside Coffee"></div>
+            <div class="field"><label for="business-industry">Industry *</label><input id="business-industry" name="industry" maxlength="120" required placeholder="e.g. food, agriculture, technology"></div>
+            <div class="field"><label for="business-market">Target customers</label><input id="business-market" name="market" maxlength="180" placeholder="e.g. students, office workers"></div>
+            <div class="field"><label for="business-budget">Starting budget</label><input id="business-budget" name="budget" maxlength="120" placeholder="e.g. $10,000"></div>
+            <div class="field full"><label for="business-objective">Goals and customer problem *</label><textarea id="business-objective" name="objective" maxlength="1400" required placeholder="What are you trying to achieve, and what customer need will you address?"></textarea></div>
+            <div class="field full"><label for="business-advantages">Advantages or known competitors</label><textarea id="business-advantages" name="advantages" maxlength="1000" placeholder="What makes the idea distinct? Add competitors only if known."></textarea></div>
+            <div class="field"><label for="business-output">Plan type</label><select id="business-output" name="output"><option value="business-plan">Business plan</option><option value="strategy">90-day growth strategy</option><option value="marketing">Marketing strategy</option><option value="financial">Financial planning outline</option><option value="swot">SWOT and next steps</option></select></div>
+            <div class="field"><label for="business-language">Output language</label><select id="business-language" name="language"><option value="en">English</option><option value="km">Khmer</option><option value="both">Khmer + English summary</option></select></div>
+            <div class="field full"><div class="panel-actions"><button type="reset" class="secondary-action" id="business-reset">Clear form</button><button type="submit" class="primary-action"><i class="fa-solid fa-list-check"></i> Build outline</button></div></div>
           </form>
+          <section class="outline-card hidden" id="business-outline"><div class="result-head"><h3>Plan outline</h3><span class="result-status" id="business-outline-status">Ready for generation</span></div><ul class="outline-list" id="outline-list"></ul><div class="panel-actions"><button class="secondary-action" type="button" id="save-business-draft"><i class="fa-regular fa-bookmark"></i> Save draft</button><button class="primary-action" type="button" id="generate-business"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate plan</button></div></section>
+          <section class="result-card hidden" id="business-result"><div class="result-head"><h3 id="business-result-title">Your plan</h3><span class="result-status" id="business-result-status"></span></div><div class="rich-output" id="business-output-content"></div><div class="panel-actions"><button class="secondary-action" type="button" id="export-business"><i class="fa-solid fa-download"></i> Export Markdown</button><button class="secondary-action" type="button" id="save-business-result"><i class="fa-regular fa-bookmark"></i> Save draft</button></div></section>
+          <h3 class="drafts-heading">Saved drafts</h3><div class="draft-list" id="business-drafts"></div>
         </section>
 
-        <section class="media-panel hidden" id="image-panel">
-          <div class="media-top">
-            <div><h2 class="panel-heading"><i class="fa-solid fa-image"></i>បង្កើតរូបភាព FLUX</h2><p class="panel-description">ពិពណ៌នារូបភាពដែលអ្នកចង់បង្កើត ជាភាសាខ្មែរ ឬ English។</p></div>
-            <div class="media-controls"><select id="image-ratio" aria-label="សមាមាត្ររូបភាព"><option value="1024x1024">ការេ 1:1</option><option value="1280x720">ទេសភាព 16:9</option><option value="720x1280">បញ្ឈរ 9:16</option></select></div>
-          </div>
-          <div class="media-placeholder" id="media-placeholder"><div><i class="fa-solid fa-wand-magic-sparkles"></i><span>រូបភាពដែលបង្កើតនឹងបង្ហាញនៅទីនេះ</span></div></div>
-          <img class="generated-image hidden" id="generated-image" alt="រូបភាពដែលបង្កើតដោយ AI">
-          <div class="panel-actions hidden" id="image-actions"><button class="secondary-action" id="download-image"><i class="fa-solid fa-download"></i> ទាញយករូបភាព</button><button class="secondary-action" id="copy-image-prompt"><i class="fa-regular fa-copy"></i> ចម្លង prompt</button></div>
-        </section>
-
-        <section class="media-panel hidden" id="gallery-panel">
-          <h2 class="gallery-heading"><i class="fa-solid fa-photo-film"></i> វិចិត្រសាលរបស់អ្នក</h2>
+        <section class="page-panel hidden" id="gallery-panel">
+          <div class="panel-topline"><div><h2 class="panel-heading"><i class="fa-regular fa-images"></i>Gallery</h2><p class="panel-description">Images created in this browser are listed here. Their source links are hosted by the external image provider and may expire or stop responding.</p></div><button class="secondary-action" type="button" id="clear-gallery"><i class="fa-regular fa-trash-can"></i> Clear gallery</button></div>
           <div class="gallery-grid" id="gallery-grid"></div>
+        </section>
+
+        <section class="page-panel hidden" id="library-panel">
+          <h2 class="panel-heading"><i class="fa-regular fa-bookmark"></i>Prompt library</h2><p class="panel-description">Start with a reusable brief, then customize it in the composer.</p>
+          <div class="library-grid" id="library-grid"></div>
+        </section>
+
+        <section class="page-panel hidden" id="settings-panel">
+          <h2 class="panel-heading"><i class="fa-solid fa-sliders"></i>Settings & workspace stats</h2><p class="panel-description">Preferences and saved content are stored in this browser's local storage.</p>
+          <div class="stats-grid" id="stats-grid"></div>
+          <div class="settings-grid">
+            <div class="settings-card"><h3>AI provider / model</h3><p>Pollinations uses the existing legacy endpoint. Puter.js may require sign-in, can be unavailable, and may change its default model.</p><select id="settings-model" aria-label="AI provider and model"><option value="auto">Auto · Pollinations legacy</option><option value="pollinations-openai">Pollinations · openai</option><option value="puter-default">Puter.js · default model</option></select></div>
+            <div class="settings-card"><h3>Assistant persona</h3><p>Sets response style instructions; actual results depend on the chosen provider.</p><select id="settings-persona" aria-label="Assistant persona"><option value="general">General helper</option><option value="strategist">Business strategist</option><option value="creative">Creative partner</option><option value="coder">Software engineer</option><option value="analyst">Careful analyst</option></select></div>
+            <div class="settings-card"><h3>Appearance</h3><p>Change the color theme for this workspace.</p><button class="secondary-action" type="button" id="settings-theme"><i class="fa-regular fa-moon"></i> Toggle light / dark</button></div>
+            <div class="settings-card"><h3>Type style</h3><p>Choose the base interface font. Khmer fallback fonts remain available.</p><select id="font-select" aria-label="Interface font"><option value="dm">DM Sans</option><option value="battambang">Battambang + Inter</option><option value="system">System default</option></select></div>
+          </div>
+          <p class="note">Provider availability and rate limits are set by the service. Avoid entering sensitive or confidential information into third-party AI services.</p>
         </section>
       </div>
     </section>
 
     <footer class="input-dock" id="input-dock">
       <div class="quick-prompts" id="quick-prompts">
-        <button class="quick-chip" data-prompt="ជួយរៀបចំផែនការអាជីវកម្មសម្រាប់ "><i class="fa-solid fa-briefcase"></i>ផែនការអាជីវកម្ម</button>
-        <button class="quick-chip" data-prompt="បង្កើតយុទ្ធសាស្ត្រទីផ្សារសម្រាប់ "><i class="fa-solid fa-chart-line"></i>យុទ្ធសាស្ត្រ</button>
-        <button class="quick-chip" data-prompt="ពន្យល់ជាភាសាខ្មែរ៖ "><i class="fa-solid fa-lightbulb"></i>ពន្យល់</button>
+        <button class="quick-chip" type="button" data-prompt="Help me plan a practical business launch for "><i class="fa-solid fa-chart-line"></i>Business plan</button>
+        <button class="quick-chip" type="button" data-prompt="Draft a clear and friendly email about "><i class="fa-regular fa-envelope"></i>Write an email</button>
+        <button class="quick-chip" type="button" data-prompt="Explain this in simple terms, with an example: "><i class="fa-regular fa-lightbulb"></i>Explain a topic</button>
       </div>
       <div class="composer" id="composer">
-        <textarea id="prompt-input" rows="1" placeholder="សរសេរសំណួរជាភាសាខ្មែរ ឬ English..."></textarea>
+        <textarea id="prompt-input" rows="1" maxlength="8000" aria-label="Message prompt" placeholder="Ask OmniStudio anything..."></textarea>
         <div class="composer-tools">
-          <select class="tool-select" id="voice-language" aria-label="ភាសាសំឡេង"><option value="km-KH">សំឡេងខ្មែរ</option><option value="en-US">English voice</option><option value="th-TH">ภาษาไทย</option></select>
-          <button class="icon-control" id="voice-input" title="និយាយដើម្បីបញ្ចូលអត្ថបទ" aria-label="បញ្ចូលដោយសំឡេង"><i class="fa-solid fa-microphone"></i></button>
-          <button class="icon-control" id="voice-output" title="បើកឬបិទការអានចម្លើយ" aria-label="អានចម្លើយដោយសំឡេង"><i class="fa-solid fa-volume-high"></i></button>
+          <button class="icon-control" id="voice-input" type="button" title="Dictate message" aria-label="Dictate message"><i class="fa-solid fa-microphone"></i></button>
+          <button class="icon-control" id="voice-output" type="button" title="Toggle spoken answers" aria-label="Toggle spoken answers"><i class="fa-solid fa-volume-high"></i></button>
           <span class="tool-spacer"></span>
-          <button class="send-button" id="send-button" title="ផ្ញើសារ" aria-label="ផ្ញើសារ"><i class="fa-solid fa-arrow-up"></i></button>
+          <button class="send-button" id="send-button" type="button" title="Send message" aria-label="Send message"><i class="fa-solid fa-arrow-up"></i></button>
         </div>
       </div>
-      <div class="composer-hint">Auto AI · Pollinations · សំឡេងខ្មែរអាស្រ័យលើ browser និងឧបករណ៍របស់អ្នក</div>
+      <div class="composer-hint" id="composer-hint">Enter to send · Shift + Enter for a new line · Service availability may vary</div>
     </footer>
   </main>
 
-  <div class="lightbox" id="lightbox"><button class="lightbox-close" id="lightbox-close" aria-label="បិទ"><i class="fa-solid fa-xmark"></i></button><img id="lightbox-image" alt="រូបភាពពង្រីក"></div>
-  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview"><button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close preview"><i class="fa-solid fa-xmark"></i></button><img id="lightbox-image" alt="Expanded generated image"></div>
+  <dialog id="command-dialog"><div class="dialog-head"><h2>Command palette</h2><button class="icon-control" type="button" data-close-dialog="command-dialog" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div><div class="dialog-body"><input id="command-input" class="command-input" type="search" placeholder="Search actions…" aria-label="Search commands"><div id="command-list" class="command-list"></div></div></dialog>
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
 
   <script>
     const TEXT_API = 'https://text.pollinations.ai/openai';
     const IMAGE_API = 'https://image.pollinations.ai/prompt/';
-    const STORAGE = 'omnistudio.kh.';
+    const STORAGE = 'omnistudio.v31.';
+    const PERSONAS = {
+      general: 'Be a helpful, clear, and balanced assistant.',
+      strategist: 'Act as a practical small-business strategist. Give actionable steps, assumptions, useful measures, and risks. Clearly label estimates.',
+      creative: 'Act as an imaginative creative partner. Offer specific, original options while respecting the brief.',
+      coder: 'Act as a careful software engineer. Explain tradeoffs, preserve security, and provide correct, maintainable examples when requested.',
+      analyst: 'Act as a careful analyst. Separate evidence from assumptions, mention uncertainty, and avoid making up facts.'
+    };
+    const PROMPTS = [
+      { title: '90-day launch plan', icon: 'fa-solid fa-chart-line', description: 'Build a practical launch plan with milestones and measures.', prompt: 'Create a practical 90-day launch plan for this idea. Include weekly milestones, simple success measures, assumptions, and risks: ' },
+      { title: 'Marketing campaign', icon: 'fa-solid fa-bullhorn', description: 'Outline a focused campaign for a specific audience.', prompt: 'Design a focused marketing campaign for this audience and offer. Include message, channels, a modest budget outline, and ways to measure results: ' },
+      { title: 'Explain a concept', icon: 'fa-regular fa-lightbulb', description: 'Get a clear explanation with a useful example.', prompt: 'Explain this concept in plain language, then give one concrete example: ' },
+      { title: 'Improve a draft', icon: 'fa-regular fa-pen-to-square', description: 'Clarify, tighten, or adjust the tone of a draft.', prompt: 'Improve this draft for clarity and tone. Preserve its meaning and point out any assumptions: ' },
+      { title: 'SWOT analysis', icon: 'fa-solid fa-table-cells-large', description: 'Explore strengths, weaknesses, opportunities, and threats.', prompt: 'Create a grounded SWOT analysis for the idea below. Separate known information from assumptions and finish with prioritized next steps: ' },
+      { title: 'Compare options', icon: 'fa-solid fa-scale-balanced', description: 'Compare alternatives against explicit criteria.', prompt: 'Compare these options against practical criteria, state the tradeoffs, and recommend what information would change the decision: ' }
+    ];
     const state = {
       mode: 'chat',
       conversations: readStored('conversations', []),
       currentId: null,
       messages: [],
       gallery: readStored('gallery', []),
+      businessDrafts: readStored('businessDrafts', []),
+      currentBusiness: null,
+      currentStoryboard: '',
       controller: null,
       speaking: false,
-      theme: localStorage.getItem(STORAGE + 'theme') || 'dark'
+      theme: localStorage.getItem(STORAGE + 'theme') || 'dark',
+      model: localStorage.getItem(STORAGE + 'model') || 'auto',
+      persona: localStorage.getItem(STORAGE + 'persona') || 'general',
+      font: localStorage.getItem(STORAGE + 'font') || 'dm'
     };
     const byId = id => document.getElementById(id);
     const promptInput = byId('prompt-input');
     const chatList = byId('chat-list');
+    const modeLabels = { chat: 'Chat studio', image: 'Image studio', video: 'Video storyboard', audio: 'Audio studio', business: 'Business planner', gallery: 'Gallery', library: 'Prompt library', settings: 'Settings & stats' };
 
     function readStored(key, fallback) {
       try {
         const value = JSON.parse(localStorage.getItem(STORAGE + key));
         return value ?? fallback;
+      } catch { return fallback; }
+    }
+
+    function store(key, value) {
+      try {
+        localStorage.setItem(STORAGE + key, JSON.stringify(value));
+        return true;
       } catch {
-        return fallback;
+        toast('Browser storage is full or unavailable. Export important work to keep a copy.', 'warn');
+        return false;
       }
     }
 
@@ -330,39 +499,49 @@
       node.className = 'toast' + (type === 'error' ? ' error' : type === 'warn' ? ' warn' : '');
       node.textContent = message;
       byId('toast-stack').append(node);
-      setTimeout(() => node.remove(), 4200);
+      setTimeout(() => node.remove(), 4500);
     }
 
-    function setBusy(busy) {
+    function setBusy(busy, label = 'Generating') {
       const button = byId('send-button');
-      const pill = byId('status-pill');
-      button.disabled = false;
+      byId('status-pill').classList.toggle('busy', busy);
+      byId('status-label').textContent = busy ? label : 'Ready';
       button.classList.toggle('stop', busy);
       button.innerHTML = busy ? '<i class="fa-solid fa-stop"></i>' : '<i class="fa-solid fa-arrow-up"></i>';
-      button.setAttribute('aria-label', busy ? 'បញ្ឈប់ការបង្កើត' : 'ផ្ញើសារ');
-      button.title = busy ? 'បញ្ឈប់' : 'ផ្ញើសារ';
-      pill.classList.toggle('busy', busy);
-      byId('status-label').textContent = busy ? 'Generating' : 'Ready';
+      button.setAttribute('aria-label', busy ? 'Stop generation' : 'Send prompt');
+      button.title = busy ? 'Stop generation' : 'Send prompt';
     }
 
     function showMode(mode) {
       if (state.controller) {
-        toast('សូមបញ្ឈប់ការបង្កើតមុនពេលប្តូរផ្ទាំង។', 'warn');
+        toast('Stop the current request before switching workspaces.', 'warn');
         return;
       }
+      if (!modeLabels[mode]) return;
       state.mode = mode;
-      const labels = { chat: 'ជជែកជាមួយ AI', business: 'ផែនការ & យុទ្ធសាស្ត្រ', image: 'បង្កើតរូបភាព FLUX', gallery: 'វិចិត្រសាល' };
-      byId('mode-label').textContent = labels[mode];
-      document.querySelectorAll('.nav-button').forEach(button => button.classList.toggle('active', button.dataset.mode === mode));
+      byId('mode-label').textContent = modeLabels[mode];
+      document.querySelectorAll('.nav-button[data-mode]').forEach(button => button.classList.toggle('active', button.dataset.mode === mode));
       byId('welcome').classList.toggle('hidden', mode !== 'chat' || state.messages.length > 0);
       chatList.classList.toggle('hidden', mode !== 'chat' || state.messages.length === 0);
-      byId('business-panel').classList.toggle('hidden', mode !== 'business');
-      byId('image-panel').classList.toggle('hidden', mode !== 'image');
-      byId('gallery-panel').classList.toggle('hidden', mode !== 'gallery');
-      byId('input-dock').classList.toggle('hidden', mode === 'gallery');
-      promptInput.placeholder = mode === 'image' ? 'ពិពណ៌នារូបភាពដែលអ្នកចង់បង្កើត...' : 'សរសេរសំណួរជាភាសាខ្មែរ ឬ English...';
+      ['image', 'video', 'audio', 'business', 'gallery', 'library', 'settings'].forEach(name => byId(name + '-panel').classList.toggle('hidden', mode !== name));
+      byId('input-dock').classList.toggle('hidden', !['chat', 'image', 'video'].includes(mode));
+      byId('quick-prompts').classList.toggle('hidden', mode !== 'chat');
+      promptInput.placeholder = mode === 'image' ? 'Describe the image you want to create…' : mode === 'video' ? 'Describe the video idea for a scene-by-scene storyboard…' : 'Ask OmniStudio anything…';
+      byId('composer-hint').textContent = mode === 'image' ? 'Images are requested from Pollinations and may take a little while to load.' : mode === 'video' ? 'Creates a written storyboard only; no video file is rendered.' : 'Enter to send · Shift + Enter for a new line · Service availability may vary';
       if (mode === 'gallery') renderGallery();
-      if (window.innerWidth <= 768) byId('sidebar').classList.remove('mobile-open');
+      if (mode === 'business') renderBusinessDrafts();
+      if (mode === 'library') renderLibrary();
+      if (mode === 'settings') renderStats();
+      if (window.innerWidth <= 700) closeSidebar();
+    }
+
+    function renderMarkdown(host, source) {
+      if (window.marked && window.DOMPurify) {
+        const rendered = marked.parse(String(source || ''), { breaks: true, gfm: true });
+        host.innerHTML = DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true } });
+      } else {
+        host.textContent = String(source || '');
+      }
     }
 
     function renderMessages() {
@@ -370,47 +549,38 @@
       state.messages.forEach(message => chatList.append(createMessage(message)));
       byId('welcome').classList.toggle('hidden', state.messages.length > 0 || state.mode !== 'chat');
       chatList.classList.toggle('hidden', state.messages.length === 0 || state.mode !== 'chat');
-      requestAnimationFrame(() => {
-        const workspace = byId('workspace');
-        workspace.scrollTop = workspace.scrollHeight;
-      });
+      requestAnimationFrame(() => { byId('workspace').scrollTop = byId('workspace').scrollHeight; });
     }
 
     function createMessage(message) {
       const row = document.createElement('article');
-      row.className = 'message ' + message.role;
+      row.className = 'message ' + (message.role === 'user' ? 'user' : 'assistant');
       const avatar = document.createElement('div');
       avatar.className = 'message-avatar';
-      avatar.innerHTML = message.role === 'user' ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>';
+      avatar.innerHTML = message.role === 'user' ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-sparkles"></i>';
       const column = document.createElement('div');
       column.className = 'message-column';
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
-      if (message.role === 'assistant' && message.content && window.marked && window.DOMPurify) {
+      if (message.role === 'assistant' && message.content) {
         bubble.classList.add('markdown');
-        bubble.innerHTML = DOMPurify.sanitize(marked.parse(message.content, { breaks: true, gfm: true }), { USE_PROFILES: { html: true } });
-      } else {
-        bubble.textContent = message.content;
-      }
+        renderMarkdown(bubble, message.content);
+      } else bubble.textContent = message.content || '';
       column.append(bubble);
       if (message.role === 'assistant' && message.content) {
         const actions = document.createElement('div');
         actions.className = 'message-actions';
         const copy = document.createElement('button');
-        copy.type = 'button';
-        copy.innerHTML = '<i class="fa-regular fa-copy"></i> ចម្លង';
-        copy.addEventListener('click', () => navigator.clipboard.writeText(message.content).then(() => toast('បានចម្លងអត្ថបទ។')).catch(() => toast('មិនអាចចម្លងបាន។', 'error')));
+        copy.type = 'button'; copy.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+        copy.addEventListener('click', () => copyText(message.content, 'Response copied.'));
         const speak = document.createElement('button');
-        speak.type = 'button';
-        speak.innerHTML = '<i class="fa-solid fa-volume-high"></i> ស្តាប់';
+        speak.type = 'button'; speak.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen';
         speak.addEventListener('click', () => speakText(message.content));
         actions.append(copy, speak);
-        const messageIndex = state.messages.indexOf(message);
-        const previousMessage = state.messages[messageIndex - 1];
-        if (messageIndex === state.messages.length - 1 && previousMessage?.role === 'user' && !state.controller) {
+        const index = state.messages.indexOf(message);
+        if (index === state.messages.length - 1 && state.messages[index - 1]?.role === 'user' && !state.controller) {
           const regenerate = document.createElement('button');
-          regenerate.type = 'button';
-          regenerate.innerHTML = '<i class="fa-solid fa-rotate-right"></i> បង្កើតម្ដងទៀត';
+          regenerate.type = 'button'; regenerate.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate';
           regenerate.addEventListener('click', regenerateLatestResponse);
           actions.append(regenerate);
         }
@@ -423,14 +593,13 @@
     function saveConversation() {
       if (!state.messages.length) return;
       if (!state.currentId) state.currentId = crypto.randomUUID?.() || 'conversation-' + Date.now();
-      const firstPrompt = state.messages.find(message => message.role === 'user')?.content || 'សន្ទនាថ្មី';
-      const title = firstPrompt.replace(/\s+/g, ' ').slice(0, 48);
+      const firstPrompt = state.messages.find(message => message.role === 'user')?.content || 'New conversation';
+      const title = firstPrompt.replace(/\s+/g, ' ').slice(0, 54);
       const existing = state.conversations.find(item => item.id === state.currentId);
-      const conversation = { id: state.currentId, title, messages: state.messages, updatedAt: Date.now() };
-      if (existing) Object.assign(existing, conversation);
-      else state.conversations.unshift(conversation);
+      const item = { id: state.currentId, title, messages: state.messages, updatedAt: Date.now() };
+      if (existing) Object.assign(existing, item); else state.conversations.unshift(item);
       state.conversations = state.conversations.slice(0, 100);
-      localStorage.setItem(STORAGE + 'conversations', JSON.stringify(state.conversations));
+      store('conversations', state.conversations);
       renderHistory();
     }
 
@@ -438,441 +607,454 @@
       const query = byId('history-search').value.trim().toLowerCase();
       const host = byId('history-list');
       host.replaceChildren();
-      const visible = state.conversations.filter(item => item.title.toLowerCase().includes(query));
+      const visible = state.conversations.filter(item => String(item.title || '').toLowerCase().includes(query));
       if (!visible.length) {
-        const empty = document.createElement('div');
-        empty.className = 'privacy-note';
-        empty.textContent = query ? 'រកមិនឃើញសន្ទនា។' : 'មិនទាន់មានប្រវត្តិ។';
-        host.append(empty);
-        return;
+        const empty = document.createElement('div'); empty.className = 'section-label'; empty.textContent = query ? 'No matches found' : 'No saved conversations yet'; host.append(empty); return;
       }
       visible.forEach(item => {
-        const row = document.createElement('button');
-        row.className = 'history-entry' + (item.id === state.currentId ? ' active' : '');
-        row.type = 'button';
-        const icon = document.createElement('i');
-        icon.className = 'fa-regular fa-message';
-        const title = document.createElement('span');
-        title.className = 'history-title';
-        title.textContent = item.title;
-        const remove = document.createElement('span');
-        remove.className = 'history-delete';
-        remove.innerHTML = '<i class="fa-solid fa-trash"></i>';
-        remove.setAttribute('role', 'button');
-        remove.setAttribute('aria-label', 'លុបសន្ទនា');
-        remove.addEventListener('click', event => {
-          event.stopPropagation();
-          state.conversations = state.conversations.filter(conversation => conversation.id !== item.id);
-          localStorage.setItem(STORAGE + 'conversations', JSON.stringify(state.conversations));
-          if (state.currentId === item.id) newConversation();
-          renderHistory();
-        });
+        const row = document.createElement('button'); row.className = 'history-entry' + (item.id === state.currentId ? ' active' : ''); row.type = 'button';
+        const icon = document.createElement('i'); icon.className = 'fa-regular fa-message';
+        const title = document.createElement('span'); title.className = 'history-title'; title.textContent = item.title || 'Conversation';
+        const remove = document.createElement('span'); remove.className = 'history-delete'; remove.innerHTML = '<i class="fa-solid fa-xmark"></i>'; remove.setAttribute('role', 'button'); remove.setAttribute('aria-label', 'Delete conversation'); remove.tabIndex = 0;
+        const deleteItem = event => { event.stopPropagation(); state.conversations = state.conversations.filter(conversation => conversation.id !== item.id); store('conversations', state.conversations); if (state.currentId === item.id) newConversation(); renderHistory(); };
+        remove.addEventListener('click', deleteItem); remove.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); deleteItem(event); } });
         row.append(icon, title, remove);
-        row.addEventListener('click', () => {
-          state.currentId = item.id;
-          state.messages = structuredClone(item.messages);
-          showMode('chat');
-          renderMessages();
-        });
+        row.addEventListener('click', () => { state.currentId = item.id; state.messages = JSON.parse(JSON.stringify(item.messages || [])); showMode('chat'); renderMessages(); renderHistory(); });
         host.append(row);
       });
     }
 
     function newConversation() {
-      if (state.controller) {
-        state.controller.abort();
-        state.controller = null;
-        setBusy(false);
+      if (state.controller) { state.controller.abort(); state.controller = null; setBusy(false); }
+      state.currentId = null; state.messages = []; promptInput.value = ''; promptInput.style.height = 'auto'; renderMessages(); showMode('chat'); renderHistory();
+    }
+
+    function systemInstruction() {
+      const persona = PERSONAS[state.persona] || PERSONAS.general;
+      return `${persona} Answer in the language the user uses, unless they ask otherwise. Be clear about uncertainty. Do not claim access to current live data. Label estimates and avoid inventing facts or statistics.`;
+    }
+
+    function selectedProvider() { return byId('model-select').value || 'auto'; }
+
+    async function requestText(prompt, signal, onUpdate, options = {}) {
+      const provider = options.provider || selectedProvider();
+      const history = (options.history ?? state.messages).filter(message => message.content && ['user', 'assistant'].includes(message.role)).slice(-12).map(message => ({ role: message.role, content: message.content }));
+      const messages = [{ role: 'system', content: systemInstruction() }, ...history];
+      if (options.appendPrompt) messages.push({ role: 'user', content: prompt });
+      if (provider === 'puter-default') {
+        if (!window.puter?.ai?.chat) throw new Error('Puter.js is unavailable. Check your connection to the Puter.js service, or choose Pollinations in the model menu.');
+        try {
+          const result = await window.puter.ai.chat(messages, { stream: false });
+          if (signal.aborted) throw new DOMException('Request stopped', 'AbortError');
+          const content = typeof result === 'string' ? result : result?.message?.content ?? result?.text ?? '';
+          if (typeof content !== 'string' || !content.trim()) throw new Error('Puter.js returned an empty response.');
+          onUpdate(content);
+          return content.trim();
+        } catch (error) {
+          if (error.name === 'AbortError') throw error;
+          const detail = error?.message || 'provider request failed';
+          throw new Error(`Puter.js request failed or sign-in was declined (${detail}). You can retry or select Pollinations.`);
+        }
       }
-      state.currentId = null;
-      state.messages = [];
-      promptInput.value = '';
-      renderMessages();
-      showMode('chat');
-      renderHistory();
-    }
-
-    function detectIntent(text) {
-      if (/អាជីវកម្ម|យុទ្ធសាស្ត្រ|ទីផ្សារ|ចំណូល|អតិថិជន|ថវិកា|business|strategy|market|revenue|startup/i.test(text)) return 'business';
-      if (/code|function|class|debug|error|javascript|python/i.test(text)) return 'coding';
-      if (/បកប្រែ|translate|translation/i.test(text)) return 'translation';
-      if (/សង្ខេប|summari[sz]e|shorten/i.test(text)) return 'summary';
-      return 'general';
-    }
-
-    function systemInstruction(intent) {
-      const directions = {
-        business: 'Act as a practical small-business and strategy advisor familiar with Cambodia and Southeast Asia. Give actionable steps, assumptions, risks, useful metrics, and clearly label estimates.',
-        coding: 'Act as a careful software engineer. Explain the solution and provide safe, correct code when requested.',
-        translation: 'Translate accurately and preserve meaning, tone, names, and formatting.',
-        summary: 'Summarize the main points clearly without inventing facts.',
-        general: 'Answer helpfully, accurately, and with appropriate detail.'
-      };
-      return `${directions[intent]} Respond in Khmer by default unless the user explicitly requests another language. Keep figures and market claims clearly identified as estimates unless verified. Do not claim to have accessed current live data.`;
-    }
-
-    async function requestChat(text, signal, onUpdate) {
-      const intent = detectIntent(text);
-      const history = state.messages.filter(message => message.content).slice(-12).map(message => ({ role: message.role, content: message.content }));
       const response = await fetch(TEXT_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal,
-        body: JSON.stringify({
-          model: 'openai',
-          messages: [{ role: 'system', content: systemInstruction(intent) }, ...history],
-          private: true,
-          stream: true,
-          seed: Math.floor(Math.random() * 1000000)
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
+        body: JSON.stringify({ model: 'openai', messages, private: true, stream: true, seed: Math.floor(Math.random() * 1000000) })
       });
-      if (!response.ok) throw new Error(`Pollinations returned ${response.status}`);
-      if (response.headers.get('content-type')?.includes('text/event-stream') && response.body) {
-        return readChatStream(response.body, onUpdate);
-      }
+      if (!response.ok) throw new Error(`Pollinations returned HTTP ${response.status}. It may be unavailable or rate-limited.`);
+      if (response.headers.get('content-type')?.includes('text/event-stream') && response.body) return readTextStream(response.body, onUpdate);
       const result = await response.json();
       const content = result?.choices?.[0]?.message?.content;
-      if (typeof content !== 'string' || !content.trim()) throw new Error('No text returned by Pollinations');
+      if (typeof content !== 'string' || !content.trim()) throw new Error('No text was returned by Pollinations.');
       onUpdate(content);
       return content.trim();
     }
 
-    async function readChatStream(body, onUpdate) {
-      const reader = body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let content = '';
+    async function readTextStream(body, onUpdate) {
+      const reader = body.getReader(); const decoder = new TextDecoder(); let buffer = ''; let content = '';
       const readLine = line => {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith('data:')) return false;
-        const data = trimmed.slice(5).trim();
-        if (data === '[DONE]') return true;
-        const event = JSON.parse(data);
+        const trimmed = line.trim(); if (!trimmed.startsWith('data:')) return false;
+        const data = trimmed.slice(5).trim(); if (data === '[DONE]') return true;
+        let event; try { event = JSON.parse(data); } catch { return false; }
         if (event.error) throw new Error(event.error.message || 'Pollinations stream error');
         const delta = event.choices?.[0]?.delta?.content || event.choices?.[0]?.message?.content || '';
-        if (typeof delta === 'string' && delta) {
-          content += delta;
-          onUpdate(content);
-        }
+        if (typeof delta === 'string' && delta) { content += delta; onUpdate(content); }
         return false;
       };
       while (true) {
-        const { value, done } = await reader.read();
-        buffer += decoder.decode(value, { stream: !done });
-        const lines = buffer.split(/\r?\n/);
-        buffer = lines.pop() || '';
+        const { value, done } = await reader.read(); buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split(/\r?\n/); buffer = lines.pop() || '';
         for (const line of lines) if (readLine(line)) return content.trim();
         if (done) break;
       }
       if (buffer) readLine(buffer);
-      if (!content.trim()) throw new Error('No text returned by Pollinations');
+      if (!content.trim()) throw new Error('No text was returned by Pollinations.');
       return content.trim();
     }
 
     async function sendMessage(messageText = promptInput.value.trim(), addUserMessage = true) {
-      if (state.controller) {
-        state.controller.abort();
-        return;
-      }
+      if (state.controller) { state.controller.abort(); return; }
       if (!messageText || state.mode !== 'chat') return;
       if (addUserMessage) state.messages.push({ role: 'user', content: messageText });
-      const assistant = { role: 'assistant', content: '' };
-      state.messages.push(assistant);
-      promptInput.value = '';
-      promptInput.style.height = 'auto';
-      renderMessages();
+      const assistant = { role: 'assistant', content: '' }; state.messages.push(assistant);
+      promptInput.value = ''; promptInput.style.height = 'auto'; renderMessages();
       const assistantBubble = chatList.lastElementChild?.querySelector('.message-bubble');
-      const controller = new AbortController();
-      state.controller = controller;
-      setBusy(true);
+      const controller = new AbortController(); state.controller = controller; setBusy(true);
       try {
-        assistant.content = await requestChat(messageText, controller.signal, partial => {
-          if (state.controller !== controller) return;
-          assistant.content = partial;
-          if (assistantBubble) assistantBubble.textContent = partial;
-          byId('workspace').scrollTop = byId('workspace').scrollHeight;
+        assistant.content = await requestText(messageText, controller.signal, partial => {
+          if (state.controller !== controller || !assistantBubble) return;
+          assistant.content = partial; assistantBubble.textContent = partial; byId('workspace').scrollTop = byId('workspace').scrollHeight;
         });
         if (byId('voice-output').dataset.enabled === 'true') speakText(assistant.content);
       } catch (error) {
-        const assistantIndex = state.messages.indexOf(assistant);
-        if (assistantIndex !== -1) state.messages.splice(assistantIndex, 1);
-        if (error.name !== 'AbortError') {
-          state.messages.push({ role: 'assistant', content: 'សូមអភ័យទោស មិនអាចភ្ជាប់ទៅ Pollinations បានទេ។ សូមពិនិត្យការភ្ជាប់អ៊ីនធឺណិត ឬសាកល្បងម្តងទៀត។ (' + error.message + ')' });
-          toast('ការស្នើសុំ AI បរាជ័យ។', 'error');
-        }
+        const index = state.messages.indexOf(assistant); if (index !== -1) state.messages.splice(index, 1);
+        if (error.name !== 'AbortError') { state.messages.push({ role: 'assistant', content: `Sorry, the request could not be completed. ${error.message}` }); toast('AI request failed. Check the provider message and try again.', 'error'); }
       } finally {
-        if (state.controller === controller) {
-          state.controller = null;
-          setBusy(false);
-        }
-        renderMessages();
-        saveConversation();
+        if (state.controller === controller) { state.controller = null; setBusy(false); }
+        renderMessages(); saveConversation();
       }
     }
 
     async function regenerateLatestResponse() {
       if (state.controller || state.mode !== 'chat') return;
-      const latestAssistant = state.messages[state.messages.length - 1];
-      const previousUser = state.messages[state.messages.length - 2];
-      if (latestAssistant?.role !== 'assistant' || previousUser?.role !== 'user') return;
-      state.messages.pop();
-      renderMessages();
-      await sendMessage(previousUser.content, false);
+      const assistant = state.messages.at(-1); const user = state.messages.at(-2);
+      if (assistant?.role !== 'assistant' || user?.role !== 'user') return;
+      state.messages.pop(); renderMessages(); await sendMessage(user.content, false);
     }
 
-    function businessPrompt(formData) {
-      const language = formData.get('language');
-      const languageInstruction = language === 'en' ? 'Write in English.' : language === 'both' ? 'Write in Khmer first, then provide an English summary.' : 'Write in Khmer.';
+    function businessPrompt(data) {
+      const language = data.language === 'km' ? 'Write in Khmer.' : data.language === 'both' ? 'Write in Khmer first, followed by a concise English summary.' : 'Write in English.';
       const types = {
-        'business-plan': 'a practical business plan with executive summary, customer problem, offer, market assumptions, operations, marketing, startup costs, revenue model, risks, and 90-day launch milestones',
-        strategy: 'a 90-day growth strategy with priorities, weekly actions, owners, KPIs, budget assumptions, experiments, and risks',
-        marketing: 'a marketing strategy with positioning, target segments, channels, campaign ideas, budget ranges, and measurement plan',
-        financial: 'a financial planning outline with assumptions, startup costs, monthly cash flow categories, break-even logic, scenarios, and key risks',
-        swot: 'a SWOT analysis followed by ranked actions, mitigations, and measurable next steps'
+        'business-plan': 'a concise, practical business plan covering the customer problem, value proposition, market assumptions, operations, marketing, cost categories, revenue model, risks, and 90-day milestones',
+        strategy: 'a 90-day growth strategy with priorities, weekly actions, owners, useful KPIs, budget assumptions, experiments, and risks',
+        marketing: 'a marketing strategy with positioning, target segments, channels, campaign ideas, budget ranges, and measurement',
+        financial: 'a financial planning outline with stated assumptions, startup costs, monthly cash-flow categories, break-even logic, scenarios, and risks',
+        swot: 'a SWOT analysis followed by prioritized actions, mitigations, and measurable next steps'
       };
-      return `Create ${types[formData.get('output')]} for the business below. ${languageInstruction}\n\nBusiness: ${formData.get('name')}\nIndustry: ${formData.get('industry')}\nTarget customers: ${formData.get('market') || 'Not specified'}\nStarting budget: ${formData.get('budget') || 'Not specified'}\nGoals and customer problem: ${formData.get('objective')}\nAdvantages and competitors: ${formData.get('advantages') || 'Not specified'}\n\nBe specific and actionable, distinguish assumptions from confirmed facts, avoid fabricated statistics or named competitors, and include low-cost steps appropriate for Cambodia when relevant.`;
+      return `Create ${types[data.output] || types['business-plan']} for this business. ${language}\n\nBusiness: ${data.name}\nIndustry: ${data.industry}\nTarget customers: ${data.market || 'Not specified'}\nStarting budget: ${data.budget || 'Not specified'}\nGoals and customer problem: ${data.objective}\nAdvantages and known competitors: ${data.advantages || 'Not specified'}\n\nBe specific and actionable. Clearly distinguish assumptions from confirmed facts. Do not invent statistics or named competitors. Keep estimates clearly labeled and note that local market and financial details require verification.`;
+    }
+
+    function outlineFor(data) {
+      const common = ['Summary and goals', 'Target customer and problem', 'Offer and differentiation', 'Key assumptions to validate', 'Prioritized next steps'];
+      const map = {
+        'business-plan': ['Executive summary', 'Customer problem and value proposition', 'Market assumptions and customer segments', 'Operations and delivery', 'Marketing and sales', 'Startup costs and revenue assumptions', 'Risks and mitigations', '90-day milestones'],
+        strategy: ['Growth objective and baseline', 'Priority opportunities', 'Weeks 1–4: validate', 'Weeks 5–8: launch experiments', 'Weeks 9–12: review and optimize', 'Owners, budget assumptions, KPIs', 'Risks and contingencies'],
+        marketing: ['Positioning and message', 'Audience segments', 'Channel strategy', 'Campaign concepts', 'Budget ranges and timeline', 'Measurement and iteration'],
+        financial: ['Planning assumptions', 'Startup cost categories', 'Monthly cash flow categories', 'Revenue scenarios', 'Break-even logic', 'Sensitivity and risks'],
+        swot: ['Strengths', 'Weaknesses', 'Opportunities', 'Threats', 'Ranked actions and mitigations', 'Measures and next steps']
+      };
+      return map[data.output] || common;
+    }
+
+    function currentBusinessData() {
+      const formData = new FormData(byId('business-form'));
+      return Object.fromEntries(formData.entries());
+    }
+
+    function buildBusinessOutline(data) {
+      state.currentBusiness = { id: 'plan-' + Date.now(), data, content: '', updatedAt: Date.now() };
+      byId('outline-list').replaceChildren();
+      outlineFor(data).forEach(text => { const li = document.createElement('li'); li.textContent = text; byId('outline-list').append(li); });
+      byId('business-outline').classList.remove('hidden');
+      byId('business-result').classList.add('hidden');
+      byId('business-outline-status').textContent = 'Outline ready for generation';
+      storeBusinessDraft(state.currentBusiness);
+      renderBusinessDrafts();
+    }
+
+    async function generateBusinessPlan() {
+      if (!state.currentBusiness || state.controller) return;
+      const draft = state.currentBusiness; const prompt = businessPrompt(draft.data); const controller = new AbortController(); state.controller = controller;
+      byId('business-result').classList.remove('hidden'); byId('business-result-status').textContent = 'Generating…'; byId('business-output-content').textContent = 'Preparing your plan…';
+      byId('generate-business').disabled = true; byId('business-outline-status').textContent = 'Generating plan…';
+      setBusy(true, 'Planning');
+      try {
+        const content = await requestText(prompt, controller.signal, partial => { if (state.controller === controller) { byId('business-output-content').textContent = partial; } }, { history: [], appendPrompt: true });
+        if (state.controller !== controller) return;
+        draft.content = content; draft.updatedAt = Date.now(); state.currentBusiness = draft; storeBusinessDraft(draft);
+        renderMarkdown(byId('business-output-content'), content); byId('business-result-status').textContent = 'Complete'; byId('business-outline-status').textContent = 'Plan generated'; renderBusinessDrafts(); toast('Business plan generated. Validate assumptions before acting.');
+      } catch (error) {
+        if (error.name !== 'AbortError') { byId('business-result-status').textContent = 'Request failed'; byId('business-output-content').textContent = error.message; toast('Could not generate the business plan.', 'error'); }
+      } finally {
+        if (state.controller === controller) { state.controller = null; setBusy(false); }
+        byId('generate-business').disabled = false;
+      }
+    }
+
+    function storeBusinessDraft(draft) {
+      const index = state.businessDrafts.findIndex(item => item.id === draft.id);
+      if (index >= 0) state.businessDrafts[index] = draft; else state.businessDrafts.unshift(draft);
+      state.businessDrafts = state.businessDrafts.slice(0, 30);
+      store('businessDrafts', state.businessDrafts);
+    }
+
+    function saveCurrentBusiness() {
+      if (!state.currentBusiness) { toast('Build an outline before saving a draft.', 'warn'); return; }
+      state.currentBusiness.data = currentBusinessData(); state.currentBusiness.updatedAt = Date.now(); storeBusinessDraft(state.currentBusiness); renderBusinessDrafts(); toast('Business draft saved in this browser.');
+    }
+
+    function renderBusinessDrafts() {
+      const host = byId('business-drafts'); host.replaceChildren();
+      if (!state.businessDrafts.length) { const empty = document.createElement('div'); empty.className = 'note'; empty.textContent = 'No saved drafts yet. Build an outline to save one.'; host.append(empty); return; }
+      state.businessDrafts.forEach(draft => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'draft-item';
+        const icon = document.createElement('i'); icon.className = 'fa-regular fa-file-lines';
+        const copy = document.createElement('span'); copy.className = 'draft-copy';
+        const title = document.createElement('strong'); title.textContent = draft.data?.name || 'Business plan';
+        const meta = document.createElement('small'); meta.textContent = new Date(draft.updatedAt || Date.now()).toLocaleDateString();
+        copy.append(title, meta); button.append(icon, copy);
+        button.addEventListener('click', () => loadBusinessDraft(draft.id)); host.append(button);
+      });
+    }
+
+    function loadBusinessDraft(id) {
+      const draft = state.businessDrafts.find(item => item.id === id); if (!draft) return;
+      Object.entries(draft.data || {}).forEach(([key, value]) => { const field = byId('business-form').elements.namedItem(key); if (field) field.value = value; });
+      state.currentBusiness = JSON.parse(JSON.stringify(draft));
+      byId('outline-list').replaceChildren(); outlineFor(draft.data).forEach(text => { const li = document.createElement('li'); li.textContent = text; byId('outline-list').append(li); });
+      byId('business-outline').classList.remove('hidden'); byId('business-outline-status').textContent = draft.content ? 'Saved plan loaded' : 'Saved outline loaded';
+      if (draft.content) { byId('business-result').classList.remove('hidden'); byId('business-result-status').textContent = 'Saved draft'; byId('business-result-title').textContent = draft.data?.name || 'Your plan'; renderMarkdown(byId('business-output-content'), draft.content); }
+      else byId('business-result').classList.add('hidden');
+      byId('workspace').scrollTop = 0; toast('Saved draft loaded.');
+    }
+
+    function exportText(filename, content, type = 'text/markdown;charset=utf-8') {
+      const url = URL.createObjectURL(new Blob([content], { type })); const link = document.createElement('a'); link.href = url; link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function safeFilename(text) { return String(text || 'omnistudio').replace(/[^\p{L}\p{N}-]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'omnistudio'; }
+
+    function exportConversation() {
+      if (!state.messages.length) { toast('There is no conversation to export.', 'warn'); return; }
+      const title = state.conversations.find(item => item.id === state.currentId)?.title || 'OmniStudio conversation';
+      const markdown = `# ${title}\n\n${state.messages.map(message => `## ${message.role === 'user' ? 'You' : 'OmniStudio'}\n\n${message.content}`).join('\n\n---\n\n')}\n`;
+      exportText(`${safeFilename(title)}.md`, markdown); toast('Conversation exported as Markdown.');
     }
 
     async function generateImage() {
       const description = promptInput.value.trim();
-      if (!description || state.controller) {
-        if (!description) toast('សូមពិពណ៌នារូបភាពជាមុន។', 'warn');
-        return;
-      }
+      if (!description || state.controller) { if (!description) toast('Describe the image first.', 'warn'); return; }
       const [width, height] = byId('image-ratio').value.split('x');
-      const imageUrl = IMAGE_API + encodeURIComponent(description) + `?model=flux&width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
-      const image = byId('generated-image');
-      const placeholder = byId('media-placeholder');
-      promptInput.value = '';
-      placeholder.innerHTML = '<div><i class="fa-solid fa-circle-notch fa-spin"></i><span>កំពុងបង្កើតរូបភាព FLUX...</span></div>';
-      placeholder.classList.remove('hidden');
-      image.classList.add('hidden');
-      byId('image-actions').classList.add('hidden');
-      const controller = new AbortController();
-      state.controller = controller;
-      setBusy(true);
-      const verifyImage = new Image();
-      verifyImage.onload = () => {
-        if (controller.signal.aborted) return;
-        image.src = imageUrl;
-        image.dataset.url = imageUrl;
-        image.dataset.prompt = description;
-        image.classList.remove('hidden');
-        byId('image-actions').classList.remove('hidden');
-        placeholder.classList.add('hidden');
-        state.gallery.unshift({ id: 'image-' + Date.now(), url: imageUrl, prompt: description, createdAt: Date.now() });
-        state.gallery = state.gallery.slice(0, 80);
-        localStorage.setItem(STORAGE + 'gallery', JSON.stringify(state.gallery));
-        toast('រូបភាពបានបង្កើតរួចរាល់។');
-      };
-      verifyImage.onerror = () => {
-        if (controller.signal.aborted) return;
-        placeholder.innerHTML = '<div class="media-error"><i class="fa-solid fa-triangle-exclamation"></i><br>បង្កើតរូបភាពមិនបាន។ Pollinations អាចមិនឆ្លើយតប ឬកំណត់អត្រា។</div>';
-      };
-      verifyImage.src = imageUrl;
-      controller.signal.addEventListener('abort', () => {
-        verifyImage.src = '';
-        if (!placeholder.classList.contains('hidden')) {
-          placeholder.innerHTML = controller.signal.reason === 'timeout' ? '<div class="media-error">Pollinations មិនបានឆ្លើយតបក្នុងពេលកំណត់។ សូមសាកល្បងម្តងទៀត។</div>' : '<div class="media-error">បានបញ្ឈប់ការបង្កើតរូបភាព។</div>';
-        }
-      });
+      const imageUrl = IMAGE_API + encodeURIComponent(description) + `?model=flux&width=${width}&height=${height}&seed=${Math.floor(Math.random() * 1000000)}`;
+      const image = byId('generated-image'); const placeholder = byId('media-placeholder');
+      promptInput.value = ''; promptInput.style.height = 'auto';
+      placeholder.innerHTML = '<div><i class="fa-solid fa-circle-notch fa-spin"></i><span>Requesting image…</span></div>'; placeholder.classList.remove('hidden'); image.classList.add('hidden'); byId('image-actions').classList.add('hidden');
+      const controller = new AbortController(); state.controller = controller; setBusy(true, 'Generating image');
+      const verify = new Image(); let finished = false;
+      const finish = () => { if (finished) return; finished = true; clearTimeout(timeout); if (state.controller === controller) { state.controller = null; setBusy(false); } };
       const timeout = setTimeout(() => controller.abort('timeout'), 120000);
-      verifyImage.addEventListener('load', () => clearTimeout(timeout), { once: true });
-      verifyImage.addEventListener('error', () => clearTimeout(timeout), { once: true });
-      const finish = () => {
-        clearTimeout(timeout);
-        if (state.controller === controller) state.controller = null;
-        setBusy(false);
+      verify.onload = () => {
+        if (controller.signal.aborted) return;
+        image.src = imageUrl; image.dataset.url = imageUrl; image.dataset.prompt = description; image.classList.remove('hidden'); byId('image-actions').classList.remove('hidden'); placeholder.classList.add('hidden');
+        state.gallery.unshift({ id: 'image-' + Date.now(), url: imageUrl, prompt: description, createdAt: Date.now() }); state.gallery = state.gallery.slice(0, 80); store('gallery', state.gallery); byId('gallery-count').textContent = state.gallery.length; toast('Image preview loaded.'); finish();
       };
-      verifyImage.addEventListener('load', finish, { once: true });
-      verifyImage.addEventListener('error', finish, { once: true });
+      verify.onerror = () => { if (!controller.signal.aborted) { placeholder.innerHTML = '<div class="media-error"><i class="fa-solid fa-triangle-exclamation"></i><br>Image request failed. The provider may be unavailable or rate-limited.</div>'; } finish(); };
+      controller.signal.addEventListener('abort', () => { verify.src = ''; placeholder.textContent = controller.signal.reason === 'timeout' ? 'Image request timed out. Try again later.' : 'Image request stopped.'; finish(); });
+      verify.src = imageUrl;
     }
 
     function renderGallery() {
-      const grid = byId('gallery-grid');
-      grid.replaceChildren();
-      if (!state.gallery.length) {
-        const empty = document.createElement('div');
-        empty.className = 'gallery-empty';
-        empty.innerHTML = '<i class="fa-regular fa-images"></i><br>មិនទាន់មានរូបភាពទេ។';
-        grid.append(empty);
-        return;
-      }
+      const grid = byId('gallery-grid'); grid.replaceChildren(); byId('gallery-count').textContent = state.gallery.length;
+      if (!state.gallery.length) { const empty = document.createElement('div'); empty.className = 'empty-state'; empty.innerHTML = '<i class="fa-regular fa-images"></i>No generated images saved in this browser yet.'; grid.append(empty); return; }
       state.gallery.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'gallery-card';
-        const image = document.createElement('img');
-        image.src = item.url;
-        image.alt = item.prompt || 'រូបភាព AI';
-        image.loading = 'lazy';
-        image.addEventListener('click', () => openLightbox(item.url));
-        const remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'gallery-remove';
-        remove.setAttribute('aria-label', 'លុបរូបភាព');
-        remove.innerHTML = '<i class="fa-solid fa-trash"></i>';
-        remove.addEventListener('click', event => {
-          event.stopPropagation();
-          state.gallery = state.gallery.filter(entry => entry.id !== item.id);
-          localStorage.setItem(STORAGE + 'gallery', JSON.stringify(state.gallery));
-          renderGallery();
-        });
-        card.append(image, remove);
-        grid.append(card);
+        const card = document.createElement('div'); card.className = 'gallery-card';
+        const image = document.createElement('img'); image.src = item.url; image.alt = item.prompt || 'Generated image'; image.loading = 'lazy'; image.addEventListener('click', () => openLightbox(item.url));
+        const caption = document.createElement('div'); caption.className = 'gallery-caption'; caption.textContent = item.prompt || 'Generated image';
+        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'gallery-remove'; remove.setAttribute('aria-label', 'Remove image'); remove.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        remove.addEventListener('click', () => { state.gallery = state.gallery.filter(entry => entry.id !== item.id); store('gallery', state.gallery); renderGallery(); });
+        card.append(image, caption, remove); grid.append(card);
       });
     }
 
-    function openLightbox(url) {
-      byId('lightbox-image').src = url;
-      byId('lightbox').classList.add('open');
-    }
-
-    function exportConversation() {
-      if (!state.messages.length) {
-        toast('មិនមានសន្ទនាដើម្បីនាំចេញទេ។', 'warn');
-        return;
-      }
-      const title = state.conversations.find(item => item.id === state.currentId)?.title || 'OmniStudio conversation';
-      const markdown = `# ${title}\n\n${state.messages.map(message => `## ${message.role === 'user' ? 'អ្នក' : 'OmniStudio'}\n\n${message.content}`).join('\n\n---\n\n')}\n`;
-      const blobUrl = URL.createObjectURL(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }));
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `${title.replace(/[^\p{L}\p{N}-]+/gu, '-').slice(0, 60) || 'conversation'}.md`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-      toast('បាននាំចេញសន្ទនាជា Markdown។');
-    }
+    function openLightbox(url) { byId('lightbox-image').src = url; byId('lightbox').classList.add('open'); byId('lightbox-close').focus(); }
 
     async function downloadGeneratedImage() {
-      const image = byId('generated-image');
-      if (!image.dataset.url) return;
+      const image = byId('generated-image'); if (!image.dataset.url) return;
+      try { const response = await fetch(image.dataset.url); if (!response.ok) throw new Error('Download failed'); const url = URL.createObjectURL(await response.blob()); const link = document.createElement('a'); link.href = url; link.download = `omnistudio-${Date.now()}.png`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+      catch { window.open(image.dataset.url, '_blank', 'noopener,noreferrer'); toast('Opened the image source in a new tab; direct download was unavailable.', 'warn'); }
+    }
+
+    async function generateStoryboard() {
+      const brief = promptInput.value.trim(); if (!brief || state.controller) { if (!brief) toast('Describe the video idea first.', 'warn'); return; }
+      promptInput.value = ''; promptInput.style.height = 'auto'; const controller = new AbortController(); state.controller = controller; setBusy(true, 'Building storyboard');
+      byId('storyboard-card').classList.remove('hidden'); byId('storyboard-placeholder').classList.add('hidden'); byId('storyboard-status').textContent = 'Generating…'; byId('storyboard-output').textContent = 'Structuring scenes…';
+      const instruction = `Create a useful written video storyboard from this brief. Include a short concept, an appropriate duration estimate, then 4–6 numbered scenes. For each scene include approximate timing, visual/action, shot or camera note, narration/dialogue if relevant, and a concise image-generation prompt. Close with an optional production checklist. Do not claim to render or generate an actual video file. Brief: ${brief}`;
       try {
-        const response = await fetch(image.dataset.url);
-        if (!response.ok) throw new Error('Download failed');
-        const blobUrl = URL.createObjectURL(await response.blob());
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = `omnistudio-${Date.now()}.png`;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-      } catch {
-        window.open(image.dataset.url, '_blank', 'noopener,noreferrer');
-        toast('រូបភាពបានបើកក្នុងផ្ទាំងថ្មី។', 'warn');
-      }
+        state.currentStoryboard = await requestText(instruction, controller.signal, partial => { if (state.controller === controller) byId('storyboard-output').textContent = partial; }, { history: [], appendPrompt: true });
+        if (state.controller !== controller) return;
+        renderMarkdown(byId('storyboard-output'), state.currentStoryboard); byId('storyboard-status').textContent = 'Ready'; toast('Storyboard is ready. No video file was rendered.');
+      } catch (error) {
+        if (error.name !== 'AbortError') { byId('storyboard-status').textContent = 'Request failed'; byId('storyboard-output').textContent = error.message; toast('Could not create the storyboard.', 'error'); }
+      } finally { if (state.controller === controller) { state.controller = null; setBusy(false); } }
+    }
+
+    function renderLibrary() {
+      const host = byId('library-grid'); host.replaceChildren();
+      PROMPTS.forEach(item => {
+        const card = document.createElement('article'); card.className = 'library-card';
+        const icon = document.createElement('i'); icon.className = item.icon;
+        const title = document.createElement('h3'); title.textContent = item.title;
+        const description = document.createElement('p'); description.textContent = item.description;
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'secondary-action'; button.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Use prompt';
+        button.addEventListener('click', () => { showMode('chat'); promptInput.value = item.prompt; promptInput.focus(); promptInput.dispatchEvent(new Event('input')); });
+        card.append(icon, title, description, button); host.append(card);
+      });
+    }
+
+    function updateModel(value, persist = true) {
+      const valid = ['auto', 'pollinations-openai', 'puter-default'].includes(value) ? value : 'auto';
+      state.model = valid; byId('model-select').value = valid; byId('settings-model').value = valid;
+      byId('model-select').title = valid === 'puter-default' ? 'Puter.js default model; provider availability and sign-in may vary' : 'Pollinations legacy text endpoint';
+      if (persist) localStorage.setItem(STORAGE + 'model', valid);
+    }
+
+    function updatePersona(value, persist = true) {
+      const valid = PERSONAS[value] ? value : 'general'; state.persona = valid; byId('persona-select').value = valid; byId('settings-persona').value = valid;
+      if (persist) localStorage.setItem(STORAGE + 'persona', valid);
+    }
+
+    function applyFont(value, persist = true) {
+      const fonts = { dm: "'DM Sans', 'Battambang', sans-serif", battambang: "'Battambang', 'DM Sans', sans-serif", system: "system-ui, 'Battambang', sans-serif" };
+      state.font = fonts[value] ? value : 'dm'; document.documentElement.style.setProperty('--font', fonts[state.font]);
+      document.documentElement.style.setProperty('--heading', state.font === 'system' ? "system-ui, 'Battambang', sans-serif" : "'Manrope', 'Battambang', sans-serif"); byId('font-select').value = state.font;
+      if (persist) localStorage.setItem(STORAGE + 'font', state.font);
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = state.theme; localStorage.setItem(STORAGE + 'theme', state.theme);
+      byId('theme-toggle').innerHTML = state.theme === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
+    }
+
+    function renderStats() {
+      const host = byId('stats-grid'); host.replaceChildren();
+      const stats = [
+        ['Conversations', state.conversations.length],
+        ['Messages', state.conversations.reduce((sum, item) => sum + (item.messages?.length || 0), 0) + state.messages.length],
+        ['Saved images', state.gallery.length],
+        ['Business drafts', state.businessDrafts.length]
+      ];
+      stats.forEach(([label, value]) => { const card = document.createElement('div'); card.className = 'stat-card'; const caption = document.createElement('span'); caption.textContent = label; const number = document.createElement('strong'); number.textContent = value; card.append(caption, number); host.append(card); });
+    }
+
+    function copyText(text, success = 'Copied to clipboard.') {
+      if (!navigator.clipboard?.writeText) { toast('Clipboard access is unavailable in this browser.', 'warn'); return; }
+      navigator.clipboard.writeText(text).then(() => toast(success)).catch(() => toast('Could not access the clipboard.', 'error'));
     }
 
     function speakText(text) {
-      if (!('speechSynthesis' in window)) {
-        toast('ឧបករណ៍នេះមិនគាំទ្រការអានសំឡេងទេ។', 'warn');
-        return;
-      }
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text.slice(0, 5000));
-      utterance.lang = byId('voice-language').value;
+      if (!('speechSynthesis' in window)) { toast('Speech synthesis is not supported by this browser.', 'warn'); return; }
+      window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(String(text).slice(0, 5000));
+      const voiceName = byId('speech-voice').value; const voice = window.speechSynthesis.getVoices().find(item => item.name === voiceName); if (voice) utterance.voice = voice;
+      utterance.lang = voice?.lang || 'en-US'; utterance.onstart = () => { state.speaking = true; }; utterance.onend = () => { state.speaking = false; }; utterance.onerror = () => { state.speaking = false; toast('The selected browser voice could not play.', 'warn'); };
       window.speechSynthesis.speak(utterance);
     }
 
-    function startVoiceInput() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        toast('Browser នេះមិនគាំទ្រការបញ្ចូលសំឡេងទេ។ សូមប្រើ Chrome ឬវាយអត្ថបទ។', 'warn');
-        return;
-      }
-      const recognition = new SpeechRecognition();
-      recognition.lang = byId('voice-language').value;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      recognition.onresult = event => {
-        promptInput.value = (promptInput.value ? promptInput.value + ' ' : '') + event.results[0][0].transcript;
-        promptInput.dispatchEvent(new Event('input'));
-        promptInput.focus();
-      };
-      recognition.onerror = event => toast('សំឡេងមិនអាចបម្លែងបាន៖ ' + event.error, 'warn');
-      try { recognition.start(); toast('កំពុងស្តាប់...'); } catch { toast('មិនអាចចាប់ផ្តើមសំឡេងបាន។', 'warn'); }
+    function refreshVoices() {
+      if (!('speechSynthesis' in window)) { byId('speech-voice').innerHTML = '<option value="">Speech not supported</option>'; byId('voice-note').textContent = 'Speech synthesis is not supported in this browser.'; return; }
+      const select = byId('speech-voice'); const previous = select.value; const voices = window.speechSynthesis.getVoices(); select.replaceChildren();
+      if (!voices.length) { const option = document.createElement('option'); option.value = ''; option.textContent = 'Default browser voice'; select.append(option); return; }
+      voices.forEach(voice => { const option = document.createElement('option'); option.value = voice.name; option.textContent = `${voice.name} · ${voice.lang}`; select.append(option); });
+      if (voices.some(voice => voice.name === previous)) select.value = previous;
     }
 
+    function startVoiceInput() {
+      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!Recognition) { toast('Voice input is not supported in this browser. You can type instead.', 'warn'); return; }
+      const recognition = new Recognition(); recognition.lang = 'en-US'; recognition.interimResults = false; recognition.maxAlternatives = 1;
+      recognition.onresult = event => { promptInput.value = (promptInput.value ? promptInput.value + ' ' : '') + event.results[0][0].transcript; promptInput.dispatchEvent(new Event('input')); promptInput.focus(); };
+      recognition.onerror = event => toast(`Voice input failed: ${event.error}`, 'warn');
+      try { recognition.start(); toast('Listening…'); } catch { toast('Could not start voice input.', 'warn'); }
+    }
+
+    function cancelGeneration() {
+      if (state.controller) { state.controller.abort(); state.controller = null; setBusy(false); toast('Generation stopped.', 'warn'); }
+    }
+
+    function commandActions() {
+      return [
+        { label: 'New conversation', icon: 'fa-solid fa-plus', action: newConversation },
+        ...Object.entries(modeLabels).map(([mode, label]) => ({ label: `Open ${label}`, icon: 'fa-solid fa-arrow-right', action: () => showMode(mode) })),
+        { label: 'Toggle theme', icon: 'fa-regular fa-moon', action: toggleTheme },
+        { label: 'Export conversation', icon: 'fa-solid fa-download', action: exportConversation },
+        { label: 'View workspace statistics', icon: 'fa-solid fa-chart-simple', action: () => { showMode('settings'); } }
+      ];
+    }
+
+    function renderCommands(query = '') {
+      const host = byId('command-list'); host.replaceChildren();
+      commandActions().filter(item => item.label.toLowerCase().includes(query.toLowerCase())).forEach(item => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'command-item'; const icon = document.createElement('i'); icon.className = item.icon; const label = document.createElement('span'); label.textContent = item.label;
+        button.append(icon, label); button.addEventListener('click', () => { byId('command-dialog').close(); item.action(); }); host.append(button);
+      });
+    }
+
+    function openCommands() { renderCommands(); byId('command-dialog').showModal(); byId('command-input').value = ''; byId('command-input').focus(); }
+
+    function closeSidebar() { byId('sidebar').classList.remove('mobile-open'); byId('sidebar-scrim').classList.add('hidden'); }
+    function toggleSidebar() { const open = byId('sidebar').classList.toggle('mobile-open'); byId('sidebar-scrim').classList.toggle('hidden', !open); }
+
     function bindEvents() {
-      document.querySelectorAll('.nav-button').forEach(button => button.addEventListener('click', () => showMode(button.dataset.mode)));
-      document.querySelectorAll('.suggestion[data-mode="image"]').forEach(button => button.addEventListener('click', () => showMode('image')));
+      document.querySelectorAll('.nav-button[data-mode]').forEach(button => button.addEventListener('click', () => showMode(button.dataset.mode)));
       document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => {
-        if (button.dataset.prompt) {
-          showMode('chat');
-          promptInput.value = button.dataset.prompt;
-          promptInput.focus();
-        }
+        if (button.dataset.mode) { showMode(button.dataset.mode); return; }
+        showMode('chat'); promptInput.value = button.dataset.prompt || ''; promptInput.focus(); promptInput.dispatchEvent(new Event('input'));
       }));
       byId('new-chat').addEventListener('click', newConversation);
-      byId('clear-chat').addEventListener('click', newConversation);
       byId('export-chat').addEventListener('click', exportConversation);
       byId('download-image').addEventListener('click', downloadGeneratedImage);
-      byId('copy-image-prompt').addEventListener('click', () => navigator.clipboard.writeText(byId('generated-image').dataset.prompt || '').then(() => toast('បានចម្លង prompt។')).catch(() => toast('មិនអាចចម្លង prompt បានទេ។', 'error')));
-      byId('sidebar-toggle').addEventListener('click', () => byId('sidebar').classList.toggle('mobile-open'));
+      byId('copy-image-prompt').addEventListener('click', () => copyText(byId('generated-image').dataset.prompt || '', 'Image prompt copied.'));
+      byId('sidebar-toggle').addEventListener('click', toggleSidebar);
+      byId('sidebar-scrim').addEventListener('click', closeSidebar);
+      byId('settings-shortcut').addEventListener('click', () => showMode('settings'));
       byId('history-search').addEventListener('input', renderHistory);
+      byId('model-select').addEventListener('change', event => updateModel(event.target.value));
+      byId('settings-model').addEventListener('change', event => updateModel(event.target.value));
+      byId('persona-select').addEventListener('change', event => updatePersona(event.target.value));
+      byId('settings-persona').addEventListener('change', event => updatePersona(event.target.value));
+      byId('font-select').addEventListener('change', event => applyFont(event.target.value));
+      byId('theme-toggle').addEventListener('click', toggleTheme);
+      byId('settings-theme').addEventListener('click', toggleTheme);
+      byId('stats-button').addEventListener('click', () => showMode('settings'));
       byId('send-button').addEventListener('click', () => {
-        if (state.controller) {
-          state.controller.abort();
-          state.controller = null;
-          setBusy(false);
-          toast('បានបញ្ឈប់។', 'warn');
-        } else if (state.mode === 'image') generateImage();
+        if (state.controller) cancelGeneration();
+        else if (state.mode === 'image') generateImage();
+        else if (state.mode === 'video') generateStoryboard();
         else sendMessage();
       });
-      promptInput.addEventListener('input', () => {
-        promptInput.style.height = 'auto';
-        promptInput.style.height = Math.min(promptInput.scrollHeight, 180) + 'px';
-      });
-      promptInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter' && !event.shiftKey) {
-          event.preventDefault();
-          if (state.mode === 'image') generateImage();
-          else sendMessage();
-        }
-      });
+      promptInput.addEventListener('input', () => { promptInput.style.height = 'auto'; promptInput.style.height = Math.min(promptInput.scrollHeight, 160) + 'px'; });
+      promptInput.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if (state.mode === 'image') generateImage(); else if (state.mode === 'video') generateStoryboard(); else sendMessage(); } });
       byId('voice-input').addEventListener('click', startVoiceInput);
-      byId('voice-output').addEventListener('click', () => {
-        const button = byId('voice-output');
-        const enabled = button.dataset.enabled !== 'true';
-        button.dataset.enabled = String(enabled);
-        button.classList.toggle('active', enabled);
-        toast(enabled ? 'បានបើកការអានចម្លើយ។' : 'បានបិទការអានចម្លើយ។');
-      });
-      byId('business-form').addEventListener('submit', event => {
-        event.preventDefault();
-        if (state.controller) return;
-        const formData = new FormData(event.currentTarget);
-        const prompt = businessPrompt(formData);
-        state.mode = 'chat';
-        showMode('chat');
-        sendMessage(prompt);
-      });
-      byId('business-reset').addEventListener('click', () => byId('business-form').reset());
-      byId('theme-toggle').addEventListener('click', () => {
-        state.theme = state.theme === 'dark' ? 'light' : 'dark';
-        document.documentElement.dataset.theme = state.theme;
-        byId('theme-toggle').innerHTML = state.theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-        localStorage.setItem(STORAGE + 'theme', state.theme);
-      });
+      byId('voice-output').addEventListener('click', () => { const button = byId('voice-output'); const enabled = button.dataset.enabled !== 'true'; button.dataset.enabled = String(enabled); button.classList.toggle('active', enabled); toast(enabled ? 'Spoken replies enabled.' : 'Spoken replies disabled.'); });
+      byId('business-form').addEventListener('submit', event => { event.preventDefault(); buildBusinessOutline(currentBusinessData()); });
+      byId('business-form').addEventListener('reset', () => { state.currentBusiness = null; byId('business-outline').classList.add('hidden'); byId('business-result').classList.add('hidden'); });
+      byId('save-business-draft').addEventListener('click', saveCurrentBusiness);
+      byId('save-business-result').addEventListener('click', saveCurrentBusiness);
+      byId('generate-business').addEventListener('click', generateBusinessPlan);
+      byId('export-business').addEventListener('click', () => { if (!state.currentBusiness?.content) { toast('Generate a plan before exporting.', 'warn'); return; } exportText(`${safeFilename(state.currentBusiness.data.name)}-plan.md`, `# ${state.currentBusiness.data.name}\n\n${state.currentBusiness.content}\n`); });
+      byId('clear-gallery').addEventListener('click', () => { if (!state.gallery.length) return; state.gallery = []; store('gallery', state.gallery); renderGallery(); toast('Gallery cleared from this browser.'); });
       byId('lightbox-close').addEventListener('click', () => byId('lightbox').classList.remove('open'));
-      byId('lightbox').addEventListener('click', event => {
-        if (event.target === byId('lightbox')) byId('lightbox').classList.remove('open');
-      });
+      byId('lightbox').addEventListener('click', event => { if (event.target === byId('lightbox')) byId('lightbox').classList.remove('open'); });
+      byId('export-storyboard').addEventListener('click', () => { if (!state.currentStoryboard) return; exportText('omnistudio-storyboard.md', `# Storyboard\n\n${state.currentStoryboard}\n`); });
+      byId('storyboard-to-image').addEventListener('click', () => { showMode('image'); promptInput.value = state.currentStoryboard.slice(0, 500); promptInput.focus(); promptInput.dispatchEvent(new Event('input')); });
+      byId('speak-button').addEventListener('click', () => { const text = byId('speech-text').value.trim(); if (!text) { toast('Enter text to preview first.', 'warn'); return; } speakText(text); });
+      byId('stop-speech').addEventListener('click', () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); state.speaking = false; });
+      byId('use-latest-answer').addEventListener('click', () => { const answer = [...state.messages].reverse().find(message => message.role === 'assistant')?.content; if (!answer) { toast('There is no assistant response yet.', 'warn'); return; } byId('speech-text').value = answer.slice(0, 5000); showMode('audio'); });
+      byId('command-button').addEventListener('click', openCommands);
+      byId('command-input').addEventListener('input', event => renderCommands(event.target.value));
+      document.querySelectorAll('[data-close-dialog]').forEach(button => button.addEventListener('click', () => byId(button.dataset.closeDialog).close()));
       document.addEventListener('keydown', event => {
-        if (event.key === 'Escape') {
-          byId('lightbox').classList.remove('open');
-          if (state.controller) {
-            state.controller.abort();
-            state.controller = null;
-            setBusy(false);
-          }
-        }
+        const modifier = event.metaKey || event.ctrlKey;
+        if (modifier && event.key.toLowerCase() === 'k') { event.preventDefault(); openCommands(); }
+        else if (modifier && event.key.toLowerCase() === 'n') { event.preventDefault(); newConversation(); }
+        else if (event.key === 'Escape') { byId('lightbox').classList.remove('open'); closeSidebar(); if (state.controller) cancelGeneration(); }
       });
+      if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = refreshVoices;
     }
 
     document.documentElement.dataset.theme = state.theme;
-    byId('theme-toggle').innerHTML = state.theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-    bindEvents();
-    renderHistory();
-    renderMessages();
+    byId('theme-toggle').innerHTML = state.theme === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
+    updateModel(state.model, false); updatePersona(state.persona, false); applyFont(state.font, false);
+    byId('gallery-count').textContent = state.gallery.length;
+    bindEvents(); renderHistory(); renderMessages(); renderBusinessDrafts(); renderLibrary(); renderStats(); refreshVoices();
   </script>
 </body>
 </html>
