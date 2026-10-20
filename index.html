@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -99,6 +101,25 @@
     .message-column { min-width: 0; max-width: min(86%, 760px); }
     .message-bubble { padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-panel); overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.85; font-size: 14px; }
     .message.user .message-bubble { border-color: transparent; background: var(--bg-hover); }
+    .message-bubble.markdown { white-space: normal; }
+    .message-bubble.markdown > :first-child { margin-top: 0; }
+    .message-bubble.markdown > :last-child { margin-bottom: 0; }
+    .message-bubble.markdown p, .message-bubble.markdown ul, .message-bubble.markdown ol, .message-bubble.markdown blockquote, .message-bubble.markdown pre, .message-bubble.markdown table { margin: 10px 0; }
+    .message-bubble.markdown ul, .message-bubble.markdown ol { padding-left: 24px; }
+    .message-bubble.markdown li + li { margin-top: 4px; }
+    .message-bubble.markdown h1, .message-bubble.markdown h2, .message-bubble.markdown h3 { margin: 16px 0 8px; color: var(--accent); line-height: 1.35; }
+    .message-bubble.markdown h1 { font-size: 1.4em; }
+    .message-bubble.markdown h2 { font-size: 1.2em; }
+    .message-bubble.markdown h3 { font-size: 1.08em; }
+    .message-bubble.markdown a { color: var(--accent); overflow-wrap: anywhere; }
+    .message-bubble.markdown blockquote { padding: 8px 12px; border-left: 3px solid var(--accent); color: var(--text-muted); background: var(--bg-main); }
+    .message-bubble.markdown pre { overflow-x: auto; padding: 13px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-main); }
+    .message-bubble.markdown code { padding: 2px 5px; border-radius: 4px; color: var(--accent); background: var(--bg-main); font: .92em ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .message-bubble.markdown pre code { padding: 0; color: var(--text-main); background: transparent; }
+    .message-bubble.markdown table { width: 100%; display: block; overflow-x: auto; border-collapse: collapse; font-size: 12px; }
+    .message-bubble.markdown th, .message-bubble.markdown td { padding: 7px 9px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .message-bubble.markdown th { color: var(--accent); background: var(--bg-main); }
+    .message-bubble.markdown hr { margin: 14px 0; border: 0; border-top: 1px solid var(--border); }
     .message-actions { display: flex; gap: 5px; margin: 5px 0 0 2px; opacity: .72; }
     .message-actions button { padding: 4px 7px; border: 0; border-radius: 5px; color: var(--text-muted); background: transparent; cursor: pointer; font-size: 11px; }
     .message-actions button:hover { color: var(--accent); background: var(--bg-hover); }
@@ -200,6 +221,7 @@
       </div>
       <div class="topbar-actions">
         <span class="status-pill" id="status-pill"><span class="status-dot"></span><span id="status-label">Ready</span></span>
+        <button class="icon-control" id="export-chat" aria-label="នាំចេញសន្ទនា" title="ទាញយកជា Markdown"><i class="fa-solid fa-download"></i></button>
         <button class="icon-control" id="theme-toggle" aria-label="ប្តូររចនាប័ទ្ម" title="ប្តូររចនាប័ទ្ម"><i class="fa-solid fa-sun"></i></button>
         <button class="icon-control" id="clear-chat" aria-label="សម្អាតសន្ទនា" title="សន្ទនាថ្មី"><i class="fa-regular fa-trash-can"></i></button>
       </div>
@@ -243,6 +265,7 @@
           </div>
           <div class="media-placeholder" id="media-placeholder"><div><i class="fa-solid fa-wand-magic-sparkles"></i><span>រូបភាពដែលបង្កើតនឹងបង្ហាញនៅទីនេះ</span></div></div>
           <img class="generated-image hidden" id="generated-image" alt="រូបភាពដែលបង្កើតដោយ AI">
+          <div class="panel-actions hidden" id="image-actions"><button class="secondary-action" id="download-image"><i class="fa-solid fa-download"></i> ទាញយករូបភាព</button><button class="secondary-action" id="copy-image-prompt"><i class="fa-regular fa-copy"></i> ចម្លង prompt</button></div>
         </section>
 
         <section class="media-panel hidden" id="gallery-panel">
@@ -363,7 +386,12 @@
       column.className = 'message-column';
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
-      bubble.textContent = message.content;
+      if (message.role === 'assistant' && message.content && window.marked && window.DOMPurify) {
+        bubble.classList.add('markdown');
+        bubble.innerHTML = DOMPurify.sanitize(marked.parse(message.content, { breaks: true, gfm: true }), { USE_PROFILES: { html: true } });
+      } else {
+        bubble.textContent = message.content;
+      }
       column.append(bubble);
       if (message.role === 'assistant' && message.content) {
         const actions = document.createElement('div');
@@ -474,7 +502,7 @@
       return `${directions[intent]} Respond in Khmer by default unless the user explicitly requests another language. Keep figures and market claims clearly identified as estimates unless verified. Do not claim to have accessed current live data.`;
     }
 
-    async function requestChat(text, signal) {
+    async function requestChat(text, signal, onUpdate) {
       const intent = detectIntent(text);
       const history = state.messages.filter(message => message.content).slice(-12).map(message => ({ role: message.role, content: message.content }));
       const response = await fetch(TEXT_API, {
@@ -485,13 +513,50 @@
           model: 'openai',
           messages: [{ role: 'system', content: systemInstruction(intent) }, ...history],
           private: true,
+          stream: true,
           seed: Math.floor(Math.random() * 1000000)
         })
       });
       if (!response.ok) throw new Error(`Pollinations returned ${response.status}`);
+      if (response.headers.get('content-type')?.includes('text/event-stream') && response.body) {
+        return readChatStream(response.body, onUpdate);
+      }
       const result = await response.json();
       const content = result?.choices?.[0]?.message?.content;
       if (typeof content !== 'string' || !content.trim()) throw new Error('No text returned by Pollinations');
+      onUpdate(content);
+      return content.trim();
+    }
+
+    async function readChatStream(body, onUpdate) {
+      const reader = body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let content = '';
+      const readLine = line => {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) return false;
+        const data = trimmed.slice(5).trim();
+        if (data === '[DONE]') return true;
+        const event = JSON.parse(data);
+        if (event.error) throw new Error(event.error.message || 'Pollinations stream error');
+        const delta = event.choices?.[0]?.delta?.content || event.choices?.[0]?.message?.content || '';
+        if (typeof delta === 'string' && delta) {
+          content += delta;
+          onUpdate(content);
+        }
+        return false;
+      };
+      while (true) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop() || '';
+        for (const line of lines) if (readLine(line)) return content.trim();
+        if (done) break;
+      }
+      if (buffer) readLine(buffer);
+      if (!content.trim()) throw new Error('No text returned by Pollinations');
       return content.trim();
     }
 
@@ -507,11 +572,17 @@
       promptInput.value = '';
       promptInput.style.height = 'auto';
       renderMessages();
+      const assistantBubble = chatList.lastElementChild?.querySelector('.message-bubble');
       const controller = new AbortController();
       state.controller = controller;
       setBusy(true);
       try {
-        assistant.content = await requestChat(messageText, controller.signal);
+        assistant.content = await requestChat(messageText, controller.signal, partial => {
+          if (state.controller !== controller) return;
+          assistant.content = partial;
+          if (assistantBubble) assistantBubble.textContent = partial;
+          byId('workspace').scrollTop = byId('workspace').scrollHeight;
+        });
         if (byId('voice-output').dataset.enabled === 'true') speakText(assistant.content);
       } catch (error) {
         const assistantIndex = state.messages.indexOf(assistant);
@@ -557,6 +628,7 @@
       placeholder.innerHTML = '<div><i class="fa-solid fa-circle-notch fa-spin"></i><span>កំពុងបង្កើតរូបភាព FLUX...</span></div>';
       placeholder.classList.remove('hidden');
       image.classList.add('hidden');
+      byId('image-actions').classList.add('hidden');
       const controller = new AbortController();
       state.controller = controller;
       setBusy(true);
@@ -564,7 +636,10 @@
       verifyImage.onload = () => {
         if (controller.signal.aborted) return;
         image.src = imageUrl;
+        image.dataset.url = imageUrl;
+        image.dataset.prompt = description;
         image.classList.remove('hidden');
+        byId('image-actions').classList.remove('hidden');
         placeholder.classList.add('hidden');
         state.gallery.unshift({ id: 'image-' + Date.now(), url: imageUrl, prompt: description, createdAt: Date.now() });
         state.gallery = state.gallery.slice(0, 80);
@@ -633,6 +708,40 @@
       byId('lightbox').classList.add('open');
     }
 
+    function exportConversation() {
+      if (!state.messages.length) {
+        toast('មិនមានសន្ទនាដើម្បីនាំចេញទេ។', 'warn');
+        return;
+      }
+      const title = state.conversations.find(item => item.id === state.currentId)?.title || 'OmniStudio conversation';
+      const markdown = `# ${title}\n\n${state.messages.map(message => `## ${message.role === 'user' ? 'អ្នក' : 'OmniStudio'}\n\n${message.content}`).join('\n\n---\n\n')}\n`;
+      const blobUrl = URL.createObjectURL(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${title.replace(/[^\p{L}\p{N}-]+/gu, '-').slice(0, 60) || 'conversation'}.md`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      toast('បាននាំចេញសន្ទនាជា Markdown។');
+    }
+
+    async function downloadGeneratedImage() {
+      const image = byId('generated-image');
+      if (!image.dataset.url) return;
+      try {
+        const response = await fetch(image.dataset.url);
+        if (!response.ok) throw new Error('Download failed');
+        const blobUrl = URL.createObjectURL(await response.blob());
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `omnistudio-${Date.now()}.png`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      } catch {
+        window.open(image.dataset.url, '_blank', 'noopener,noreferrer');
+        toast('រូបភាពបានបើកក្នុងផ្ទាំងថ្មី។', 'warn');
+      }
+    }
+
     function speakText(text) {
       if (!('speechSynthesis' in window)) {
         toast('ឧបករណ៍នេះមិនគាំទ្រការអានសំឡេងទេ។', 'warn');
@@ -675,6 +784,9 @@
       }));
       byId('new-chat').addEventListener('click', newConversation);
       byId('clear-chat').addEventListener('click', newConversation);
+      byId('export-chat').addEventListener('click', exportConversation);
+      byId('download-image').addEventListener('click', downloadGeneratedImage);
+      byId('copy-image-prompt').addEventListener('click', () => navigator.clipboard.writeText(byId('generated-image').dataset.prompt || '').then(() => toast('បានចម្លង prompt។')).catch(() => toast('មិនអាចចម្លង prompt បានទេ។', 'error')));
       byId('sidebar-toggle').addEventListener('click', () => byId('sidebar').classList.toggle('mobile-open'));
       byId('history-search').addEventListener('input', renderHistory);
       byId('send-button').addEventListener('click', () => {
