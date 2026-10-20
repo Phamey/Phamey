@@ -306,6 +306,7 @@
       mode: 'chat',
       conversations: readStored('conversations', []),
       currentId: null,
+      conversationTitle: null,
       messages: [],
       gallery: readStored('gallery', []),
       controller: null,
@@ -424,7 +425,7 @@
       if (!state.messages.length) return;
       if (!state.currentId) state.currentId = crypto.randomUUID?.() || 'conversation-' + Date.now();
       const firstPrompt = state.messages.find(message => message.role === 'user')?.content || 'សន្ទនាថ្មី';
-      const title = firstPrompt.replace(/\s+/g, ' ').slice(0, 48);
+      const title = state.conversationTitle || firstPrompt.replace(/\s+/g, ' ').slice(0, 48);
       const existing = state.conversations.find(item => item.id === state.currentId);
       const conversation = { id: state.currentId, title, messages: state.messages, updatedAt: Date.now() };
       if (existing) Object.assign(existing, conversation);
@@ -470,6 +471,7 @@
         row.append(icon, title, remove);
         row.addEventListener('click', () => {
           state.currentId = item.id;
+          state.conversationTitle = item.title || null;
           state.messages = structuredClone(item.messages);
           showMode('chat');
           renderMessages();
@@ -485,6 +487,7 @@
         setBusy(false);
       }
       state.currentId = null;
+      state.conversationTitle = null;
       state.messages = [];
       promptInput.value = '';
       renderMessages();
@@ -841,6 +844,13 @@
         if (state.controller) return;
         const formData = new FormData(event.currentTarget);
         const prompt = businessPrompt(formData);
+        const businessName = formData.get('name').trim();
+        const outputName = event.currentTarget.elements.output.selectedOptions[0].textContent.trim();
+        if (state.messages.length) saveConversation();
+        state.currentId = null;
+        state.conversationTitle = `${businessName} — ${outputName}`;
+        state.messages = [];
+        renderMessages();
         state.mode = 'chat';
         showMode('chat');
         sendMessage(prompt);
