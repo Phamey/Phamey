@@ -405,6 +405,15 @@
         speak.innerHTML = '<i class="fa-solid fa-volume-high"></i> ស្តាប់';
         speak.addEventListener('click', () => speakText(message.content));
         actions.append(copy, speak);
+        const messageIndex = state.messages.indexOf(message);
+        const previousMessage = state.messages[messageIndex - 1];
+        if (messageIndex === state.messages.length - 1 && previousMessage?.role === 'user' && !state.controller) {
+          const regenerate = document.createElement('button');
+          regenerate.type = 'button';
+          regenerate.innerHTML = '<i class="fa-solid fa-rotate-right"></i> បង្កើតម្ដងទៀត';
+          regenerate.addEventListener('click', regenerateLatestResponse);
+          actions.append(regenerate);
+        }
         column.append(actions);
       }
       row.append(avatar, column);
@@ -560,13 +569,13 @@
       return content.trim();
     }
 
-    async function sendMessage(messageText = promptInput.value.trim()) {
+    async function sendMessage(messageText = promptInput.value.trim(), addUserMessage = true) {
       if (state.controller) {
         state.controller.abort();
         return;
       }
       if (!messageText || state.mode !== 'chat') return;
-      state.messages.push({ role: 'user', content: messageText });
+      if (addUserMessage) state.messages.push({ role: 'user', content: messageText });
       const assistant = { role: 'assistant', content: '' };
       state.messages.push(assistant);
       promptInput.value = '';
@@ -599,6 +608,16 @@
         renderMessages();
         saveConversation();
       }
+    }
+
+    async function regenerateLatestResponse() {
+      if (state.controller || state.mode !== 'chat') return;
+      const latestAssistant = state.messages[state.messages.length - 1];
+      const previousUser = state.messages[state.messages.length - 2];
+      if (latestAssistant?.role !== 'assistant' || previousUser?.role !== 'user') return;
+      state.messages.pop();
+      renderMessages();
+      await sendMessage(previousUser.content, false);
     }
 
     function businessPrompt(formData) {
