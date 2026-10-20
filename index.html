@@ -142,6 +142,10 @@
     .message-actions { display: flex; flex-wrap: wrap; gap: 5px; margin: 5px 0 0 2px; }
     .message-actions button { padding: 4px 7px; border: 0; border-radius: 5px; color: var(--subtle); background: transparent; cursor: pointer; font-size: 10px; }
     .message-actions button:hover { color: var(--accent); background: var(--surface-hover); }
+    .message-actions button.active { color: var(--accent); background: var(--accent-wash); }
+    .message-feedback { display: inline-flex; gap: 3px; margin-left: auto; }
+    .message-edit-field { width: 100%; min-height: 85px; padding: 10px; resize: vertical; border: 1px solid var(--accent); border-radius: 8px; color: var(--text); background: var(--bg); font-size: 12px; line-height: 1.7; }
+    .message-edit-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 7px; }
     .input-dock { padding: 8px 20px 12px; display: flex; flex-direction: column; align-items: center; border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent); background: linear-gradient(180deg, transparent, var(--bg) 18%); }
     .quick-prompts { width: min(860px, 100%); display: flex; gap: 7px; overflow: auto; padding: 0 0 8px; scrollbar-width: none; }
     .quick-prompts::-webkit-scrollbar { display: none; }
@@ -716,6 +720,16 @@
         renderMarkdown(bubble, message.content);
       } else bubble.textContent = message.content || '';
       column.append(bubble);
+      if (message.role === 'user' && !(message.attachments || []).length) {
+        const actions = document.createElement('div');
+        actions.className = 'message-actions';
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.innerHTML = '<i class="fa-solid fa-pen"></i> Edit';
+        edit.addEventListener('click', () => editUserMessage(message));
+        actions.append(edit);
+        column.append(actions);
+      }
       if (message.role === 'user' && Array.isArray(message.attachments) && message.attachments.length) {
         const attachmentRow = document.createElement('div');
         attachmentRow.className = 'message-actions';
@@ -747,16 +761,85 @@
         speak.addEventListener('click', () => speakText(message.content));
         actions.append(copy, speak);
         const index = state.messages.indexOf(message);
-        if (index === state.messages.length - 1 && state.messages[index - 1]?.role === 'user' && !state.messages[index - 1]?.attachments?.some(item => item.kind === 'image') && !state.controller) {
+        if (index === state.messages.length - 1 && state.messages[index - 1]?.role === 'user' && !(state.messages[index - 1]?.attachments || []).length && !state.controller) {
           const regenerate = document.createElement('button');
           regenerate.type = 'button'; regenerate.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate';
           regenerate.addEventListener('click', regenerateLatestResponse);
           actions.append(regenerate);
         }
+        const star = document.createElement('button');
+        star.type = 'button';
+        star.classList.toggle('active', message.starred === true);
+        star.setAttribute('aria-label', message.starred ? 'Remove star' : 'Star response');
+        star.title = message.starred ? 'Remove star' : 'Star response';
+        star.innerHTML = `<i class="fa-${message.starred ? 'solid' : 'regular'} fa-star"></i>`;
+        star.addEventListener('click', () => {
+          message.starred = !message.starred;
+          saveConversation();
+          renderMessages();
+        });
+        const feedback = document.createElement('span');
+        feedback.className = 'message-feedback';
+        [[1, 'fa-thumbs-up', 'Helpful'], [-1, 'fa-thumbs-down', 'Not helpful']].forEach(([rating, icon, label]) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.classList.toggle('active', message.rating === rating);
+          button.setAttribute('aria-label', label);
+          button.title = label;
+          button.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+          button.addEventListener('click', () => {
+            message.rating = message.rating === rating ? 0 : rating;
+            saveConversation();
+            renderMessages();
+          });
+          feedback.append(button);
+        });
+        actions.append(star, feedback);
         column.append(actions);
       }
       row.append(avatar, column);
       return row;
+    }
+
+    function editUserMessage(message) {
+      if (state.controller || !state.messages.includes(message)) return;
+      const index = state.messages.indexOf(message);
+      const row = chatList.children[index];
+      const bubble = row?.querySelector('.message-bubble');
+      if (!bubble) return;
+      bubble.replaceChildren();
+      const editor = document.createElement('textarea');
+      editor.className = 'message-edit-field';
+      editor.maxLength = 8000;
+      editor.value = message.content;
+      editor.setAttribute('aria-label', 'Edit message');
+      const actions = document.createElement('div');
+      actions.className = 'message-edit-actions';
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'secondary-action';
+      cancel.textContent = 'Cancel';
+      cancel.addEventListener('click', renderMessages);
+      const save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'primary-action';
+      save.textContent = 'Save and resend';
+      save.addEventListener('click', async () => {
+        const replacement = editor.value.trim();
+        if (!replacement) { toast('Message cannot be empty.', 'warn'); return; }
+        state.messages = state.messages.slice(0, index);
+        renderMessages();
+        saveConversation();
+        await sendMessage(replacement);
+      });
+      editor.addEventListener('keydown', event => {
+        if (event.key === 'Escape') renderMessages();
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); save.click(); }
+      });
+      actions.append(cancel, save);
+      bubble.append(editor, actions);
+      editor.focus();
+      editor.setSelectionRange(editor.value.length, editor.value.length);
     }
 
     function saveConversation() {
@@ -1059,7 +1142,7 @@
             if (!file || typeof file.name !== 'string' || !['image', 'text'].includes(file.kind)) throw new Error('An attachment record in the backup is invalid.');
             return { name: file.name.slice(0, 200), kind: file.kind, type: typeof file.type === 'string' ? file.type.slice(0, 30) : file.kind };
           }) : [];
-          return { role: message.role, content: message.content, ...(attachments.length ? { attachments } : {}) };
+          return { role: message.role, content: message.content, ...(attachments.length ? { attachments } : {}), ...(typeof message.starred === 'boolean' ? { starred: message.starred } : {}), ...([-1, 0, 1].includes(message.rating) ? { rating: message.rating } : {}) };
         });
         return { id: conversation.id.slice(0, 120), title: conversation.title.slice(0, 100), messages, updatedAt: Number.isFinite(conversation.updatedAt) ? conversation.updatedAt : Date.now() };
       });
