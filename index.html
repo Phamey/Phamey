@@ -152,6 +152,17 @@
     .composer textarea { width: 100%; min-height: 43px; max-height: 160px; padding: 9px; display: block; resize: none; outline: 0; border: 0; color: var(--text); background: transparent; font-size: 13px; line-height: 1.7; }
     .composer textarea::placeholder { color: var(--subtle); }
     .composer-tools { display: flex; align-items: center; gap: 6px; padding: 6px 2px 1px; border-top: 1px solid var(--border); }
+    .composer-tools input[type="file"] { display: none; }
+    .attachment-list { display: flex; flex-wrap: wrap; gap: 7px; padding: 4px 5px 9px; }
+    .attachment-chip { min-width: 0; max-width: 230px; padding: 6px 8px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); background: var(--surface); font-size: 9px; }
+    .attachment-chip > i { flex: 0 0 auto; color: var(--accent); }
+    .attachment-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .attachment-size { flex: 0 0 auto; color: var(--subtle); }
+    .attachment-chip img { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 5px; object-fit: cover; }
+    .attachment-remove { width: 22px; height: 22px; display: grid; place-items: center; border: 0; border-radius: 5px; color: var(--muted); background: transparent; cursor: pointer; }
+    .backup-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .backup-actions input[type="file"] { display: none; }
+    .attachment-remove:hover { color: var(--danger); background: var(--surface-hover); }
     .tool-spacer { flex: 1; }
     .send-button { width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 10px; color: #18200f; background: var(--accent); cursor: pointer; transition: .18s; }
     .send-button:hover { background: var(--accent-strong); transform: scale(1.03); }
@@ -219,6 +230,8 @@
     .settings-card h3 { margin: 0 0 5px; font: 700 11px var(--heading); }
     .settings-card p { margin: 0 0 12px; color: var(--muted); font-size: 10px; line-height: 1.65; }
     .settings-card select { width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 10px; }
+    .backup-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .backup-actions input[type="file"] { display: none; }
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 18px; }
     .stat-card { padding: 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
     .stat-card span { display: block; color: var(--muted); font-size: 9px; }
@@ -430,6 +443,7 @@
           <h2 class="panel-heading"><i class="fa-solid fa-sliders"></i>Settings & workspace stats</h2><p class="panel-description">Preferences and saved content are stored in this browser's local storage.</p>
           <div class="stats-grid" id="stats-grid"></div>
           <div class="settings-grid">
+            <div class="settings-card"><h3>Full workspace backup</h3><p>Export or restore conversations, gallery entries, business drafts, and supported preferences. Imports replace current saved data only after validation and confirmation.</p><div class="backup-actions"><button class="secondary-action" type="button" id="export-backup"><i class="fa-solid fa-download"></i> Export JSON</button><button class="secondary-action" type="button" id="choose-backup-file"><i class="fa-solid fa-upload"></i> Import JSON</button><input id="backup-file-input" type="file" accept=".json,application/json" aria-label="Choose OmniStudio backup JSON"></div><p class="note">Import accepts JSON files up to 5 MB. Keep your backup somewhere secure.</p></div>
             <div class="settings-card"><h3>AI provider / model</h3><p>Pollinations uses the existing legacy endpoint. Puter.js may require sign-in, can be unavailable, and may change its default model.</p><select id="settings-model" aria-label="AI provider and model"><option value="auto">Auto · Pollinations legacy</option><option value="pollinations-openai">Pollinations · openai</option><option value="puter-default">Puter.js · default model</option></select></div>
             <div class="settings-card"><h3>Assistant persona</h3><p>Sets response style instructions; actual results depend on the chosen provider.</p><select id="settings-persona" aria-label="Assistant persona"><option value="general">General helper</option><option value="strategist">Business strategist</option><option value="creative">Creative partner</option><option value="coder">Software engineer</option><option value="analyst">Careful analyst</option></select></div>
             <div class="settings-card"><h3>Appearance</h3><p>Change the color theme for this workspace.</p><button class="secondary-action" type="button" id="settings-theme"><i class="fa-regular fa-moon"></i> Toggle light / dark</button></div>
@@ -448,14 +462,20 @@
       </div>
       <div class="composer" id="composer">
         <textarea id="prompt-input" rows="1" maxlength="8000" aria-label="Message prompt" placeholder="Ask OmniStudio anything..."></textarea>
+        <div class="attachment-list hidden" id="attachment-list" aria-label="Selected attachments" aria-live="polite"></div>
         <div class="composer-tools">
+          <button class="icon-control" id="attach-image-button" type="button" title="Attach images" aria-label="Attach images"><i class="fa-regular fa-image"></i></button>
+          <input id="image-file-input" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif" multiple aria-label="Choose images">
+          <button class="icon-control" id="attach-file-button" type="button" title="Attach text or code files" aria-label="Attach text or code files"><i class="fa-solid fa-paperclip"></i></button>
+          <input id="text-file-input" type="file" accept=".txt,.md,.json,.csv,.js,.py,.ts,.html,.css,.yaml,.yml,.xml,.log,text/plain,text/markdown,application/json,text/csv" multiple aria-label="Choose text or code files">
+          <button class="secondary-action hidden" id="clear-attachments" type="button" title="Remove all selected attachments"><i class="fa-solid fa-xmark"></i> Clear files</button>
           <button class="icon-control" id="voice-input" type="button" title="Dictate message" aria-label="Dictate message"><i class="fa-solid fa-microphone"></i></button>
           <button class="icon-control" id="voice-output" type="button" title="Toggle spoken answers" aria-label="Toggle spoken answers"><i class="fa-solid fa-volume-high"></i></button>
           <span class="tool-spacer"></span>
           <button class="send-button" id="send-button" type="button" title="Send message" aria-label="Send message"><i class="fa-solid fa-arrow-up"></i></button>
         </div>
       </div>
-      <div class="composer-hint" id="composer-hint">Enter to send · Shift + Enter for a new line · Service availability may vary</div>
+      <div class="composer-hint" id="composer-hint">Enter to send · Shift + Enter for a new line · Uploads go to the selected AI service and are not saved in conversation history. Images are routed to Puter.js.</div>
     </footer>
   </main>
 
@@ -487,6 +507,7 @@
       conversations: readStored('conversations', []),
       currentId: null,
       messages: [],
+      attachments: [],
       gallery: readStored('gallery', []),
       businessDrafts: readStored('businessDrafts', []),
       currentBusiness: null,
@@ -532,6 +553,97 @@
       setTimeout(() => node.remove(), 4500);
     }
 
+    function renderAttachments() {
+      const host = byId('attachment-list');
+      host.replaceChildren();
+      state.attachments.forEach(attachment => {
+        const chip = document.createElement('div');
+        chip.className = 'attachment-chip';
+        if (attachment.kind === 'image') {
+          const preview = document.createElement('img');
+          preview.src = attachment.dataUrl;
+          preview.alt = '';
+          chip.append(preview);
+        } else {
+          const icon = document.createElement('i');
+          icon.className = 'fa-solid fa-file-lines';
+          chip.append(icon);
+        }
+        const name = document.createElement('span');
+        name.className = 'attachment-name';
+        name.textContent = attachment.name;
+        const detail = document.createElement('span');
+        detail.className = 'attachment-size';
+        detail.textContent = attachment.kind === 'image' ? `${Math.ceil(attachment.size / 1024)} KB` : `${attachment.text.length.toLocaleString()} chars`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'attachment-remove';
+        remove.setAttribute('aria-label', `Remove ${attachment.name}`);
+        remove.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        remove.addEventListener('click', () => removeAttachment(attachment.id));
+        chip.append(name, detail, remove);
+        host.append(chip);
+      });
+      const hasAttachments = state.attachments.length > 0;
+      host.classList.toggle('hidden', !hasAttachments || state.mode !== 'chat');
+      byId('clear-attachments').classList.toggle('hidden', !hasAttachments || state.mode !== 'chat');
+    }
+
+    function readImageData(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error(`Could not read ${file.name}.`));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function addImageAttachments(files) {
+      const acceptedTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+      for (const file of files) {
+        if (!acceptedTypes.has(file.type)) { toast(`${file.name}: choose a PNG, JPEG, WebP, or GIF image.`, 'warn'); continue; }
+        if (file.size > 10 * 1024 * 1024) { toast(`${file.name}: images must be 10 MB or smaller.`, 'warn'); continue; }
+        const count = state.attachments.filter(item => item.kind === 'image').length;
+        const total = state.attachments.filter(item => item.kind === 'image').reduce((sum, item) => sum + item.size, 0);
+        if (count >= 5 || total + file.size > 20 * 1024 * 1024) { toast('Attach up to five images and 20 MB total.', 'warn'); break; }
+        try {
+          const dataUrl = await readImageData(file);
+          state.attachments.push({ id: crypto.randomUUID?.() || `att-${Date.now()}-${Math.random()}`, name: file.name, kind: 'image', type: file.type, size: file.size, dataUrl });
+        } catch (error) { toast(error.message, 'error'); }
+      }
+      renderAttachments();
+    }
+
+    async function addTextAttachments(files) {
+      const extensions = new Set(['txt', 'md', 'json', 'csv', 'js', 'py', 'ts', 'html', 'css', 'yaml', 'yml', 'xml', 'log']);
+      for (const file of files) {
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        if (!extension || !extensions.has(extension)) { toast(`${file.name}: unsupported file type.`, 'warn'); continue; }
+        if (file.size > 500 * 1024) { toast(`${file.name}: text files must be 500 KB or smaller.`, 'warn'); continue; }
+        const used = state.attachments.filter(item => item.kind === 'text').reduce((sum, item) => sum + item.text.length, 0);
+        const available = 50000 - used;
+        if (available <= 0) { toast('Attached text is limited to 50,000 characters total.', 'warn'); break; }
+        try {
+          const content = await file.text();
+          const text = content.slice(0, available);
+          if (!text) { toast(`${file.name} is empty.`, 'warn'); continue; }
+          state.attachments.push({ id: crypto.randomUUID?.() || `att-${Date.now()}-${Math.random()}`, name: file.name, kind: 'text', type: extension.toUpperCase(), size: file.size, text });
+          if (text.length < content.length) { toast(`${file.name}: attached text was shortened to fit the 50,000-character limit.`, 'warn'); break; }
+        } catch (error) { toast(`Could not read ${file.name}.`, 'error'); }
+      }
+      renderAttachments();
+    }
+
+    function removeAttachment(id) {
+      state.attachments = state.attachments.filter(attachment => attachment.id !== id);
+      renderAttachments();
+    }
+
+    function clearAttachments() {
+      state.attachments = [];
+      renderAttachments();
+    }
+
     function setBusy(busy, label = 'Generating') {
       const button = byId('send-button');
       byId('status-pill').classList.toggle('busy', busy);
@@ -549,6 +661,10 @@
         return;
       }
       if (!modeLabels[mode]) return;
+      if (mode !== 'chat' && state.attachments.length) {
+        toast('Selected files are attached to this chat draft. Send them, remove them, or return to Chat studio.', 'warn');
+        return;
+      }
       state.mode = mode;
       byId('mode-label').textContent = modeLabels[mode];
       document.querySelectorAll('.nav-button[data-mode]').forEach(button => button.classList.toggle('active', button.dataset.mode === mode));
@@ -557,6 +673,8 @@
       ['image', 'video', 'audio', 'business', 'gallery', 'library', 'settings'].forEach(name => byId(name + '-panel').classList.toggle('hidden', mode !== name));
       byId('input-dock').classList.toggle('hidden', !['chat', 'image', 'video'].includes(mode));
       byId('quick-prompts').classList.toggle('hidden', mode !== 'chat');
+      ['attach-image-button', 'image-file-input', 'attach-file-button', 'text-file-input', 'clear-attachments'].forEach(id => byId(id).classList.toggle('hidden', mode !== 'chat' || (id === 'clear-attachments' && !state.attachments.length)));
+      byId('attachment-list').classList.toggle('hidden', mode !== 'chat' || !state.attachments.length);
       promptInput.placeholder = mode === 'image' ? 'Describe the image you want to create…' : mode === 'video' ? 'Describe the video idea for a written storyboard…' : 'Ask OmniStudio anything…';
       byId('composer-hint').textContent = mode === 'image' ? 'Images are requested from Pollinations and may take a little while to load.' : mode === 'video' ? 'Enter here to create a written storyboard; use Generate AI video above for video output.' : 'Enter to send · Shift + Enter for a new line · Service availability may vary';
       if (mode === 'gallery') renderGallery();
@@ -598,6 +716,26 @@
         renderMarkdown(bubble, message.content);
       } else bubble.textContent = message.content || '';
       column.append(bubble);
+      if (message.role === 'user' && Array.isArray(message.attachments) && message.attachments.length) {
+        const attachmentRow = document.createElement('div');
+        attachmentRow.className = 'message-actions';
+        message.attachments.forEach(attachment => {
+          if (!attachment || typeof attachment.name !== 'string' || typeof attachment.kind !== 'string') return;
+          const badge = document.createElement('span');
+          badge.className = 'attachment-chip';
+          const icon = document.createElement('i');
+          icon.className = attachment.kind === 'image' ? 'fa-regular fa-image' : 'fa-solid fa-file-lines';
+          const name = document.createElement('span');
+          name.className = 'attachment-name';
+          name.textContent = attachment.name;
+          const type = document.createElement('span');
+          type.className = 'attachment-size';
+          type.textContent = attachment.type || attachment.kind;
+          badge.append(icon, name, type);
+          attachmentRow.append(badge);
+        });
+        if (attachmentRow.childElementCount) column.append(attachmentRow);
+      }
       if (message.role === 'assistant' && message.content) {
         const actions = document.createElement('div');
         actions.className = 'message-actions';
@@ -609,7 +747,7 @@
         speak.addEventListener('click', () => speakText(message.content));
         actions.append(copy, speak);
         const index = state.messages.indexOf(message);
-        if (index === state.messages.length - 1 && state.messages[index - 1]?.role === 'user' && !state.controller) {
+        if (index === state.messages.length - 1 && state.messages[index - 1]?.role === 'user' && !state.messages[index - 1]?.attachments?.some(item => item.kind === 'image') && !state.controller) {
           const regenerate = document.createElement('button');
           regenerate.type = 'button'; regenerate.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate';
           regenerate.addEventListener('click', regenerateLatestResponse);
@@ -638,7 +776,10 @@
       const query = byId('history-search').value.trim().toLowerCase();
       const host = byId('history-list');
       host.replaceChildren();
-      const visible = state.conversations.filter(item => String(item.title || '').toLowerCase().includes(query));
+      const visible = state.conversations.filter(item => {
+        const messageText = (Array.isArray(item.messages) ? item.messages : []).map(message => typeof message?.content === 'string' ? message.content : '').join('\n');
+        return `${String(item.title || '')}\n${messageText}`.toLowerCase().includes(query);
+      });
       if (!visible.length) {
         const empty = document.createElement('div'); empty.className = 'section-label'; empty.textContent = query ? 'No matches found' : 'No saved conversations yet'; host.append(empty); return;
       }
@@ -657,7 +798,7 @@
 
     function newConversation() {
       if (state.controller) cancelGeneration();
-      state.currentId = null; state.messages = []; promptInput.value = ''; promptInput.style.height = 'auto'; renderMessages(); showMode('chat'); renderHistory();
+      state.currentId = null; state.messages = []; clearAttachments(); promptInput.value = ''; promptInput.style.height = 'auto'; renderMessages(); showMode('chat'); renderHistory();
     }
 
     function systemInstruction() {
@@ -668,10 +809,28 @@
     function selectedProvider() { return byId('model-select').value || 'auto'; }
 
     async function requestText(prompt, signal, onUpdate, options = {}) {
-      const provider = options.provider || selectedProvider();
+      const attachments = options.attachments || [];
+      const images = attachments.filter(item => item.kind === 'image' && item.dataUrl);
+      const textFiles = attachments.filter(item => item.kind === 'text' && typeof item.text === 'string');
+      const provider = images.length ? 'puter-default' : options.provider || selectedProvider();
       const history = (options.history ?? state.messages).filter(message => message.content && ['user', 'assistant'].includes(message.role)).slice(-12).map(message => ({ role: message.role, content: message.content }));
+      if (options.appendPrompt) history.push({ role: 'user', content: prompt });
+      const lastUserIndex = history.map(message => message.role).lastIndexOf('user');
+      if (lastUserIndex === -1 && (textFiles.length || images.length)) history.push({ role: 'user', content: prompt || '' });
+      const targetIndex = history.map(message => message.role).lastIndexOf('user');
+      if (targetIndex !== -1 && textFiles.length) {
+        const fileContext = textFiles.map(file => `--- ${file.name} ---\n${file.text}`).join('\n\n');
+        const previous = history[targetIndex].content;
+        history[targetIndex].content = `${typeof previous === 'string' ? previous : ''}\n\n${fileContext}`.trim();
+      }
+      if (targetIndex !== -1 && images.length) {
+        const previous = history[targetIndex].content;
+        history[targetIndex].content = [
+          { type: 'text', text: typeof previous === 'string' && previous ? previous : 'Describe the attached image(s).' },
+          ...images.map(image => ({ type: 'image_url', image_url: { url: image.dataUrl } }))
+        ];
+      }
       const messages = [{ role: 'system', content: systemInstruction() }, ...history];
-      if (options.appendPrompt) messages.push({ role: 'user', content: prompt });
       if (provider === 'puter-default') {
         if (!window.puter?.ai?.chat) throw new Error('Puter.js is unavailable. Check your connection to the Puter.js service, or choose Pollinations in the model menu.');
         try {
@@ -724,17 +883,28 @@
 
     async function sendMessage(messageText = promptInput.value.trim(), addUserMessage = true) {
       if (state.controller) { state.controller.abort(); return; }
-      if (!messageText || state.mode !== 'chat') return;
-      if (addUserMessage) state.messages.push({ role: 'user', content: messageText });
+      if (state.mode !== 'chat') return;
+      const requestAttachments = state.attachments.slice();
+      if (!messageText && !requestAttachments.length) return;
+      const visiblePrompt = messageText || (requestAttachments.some(item => item.kind === 'image') ? 'Please describe the attached image.' : 'Please review the attached file(s).');
+      if (addUserMessage) {
+        state.messages.push({
+          role: 'user',
+          content: visiblePrompt,
+          attachments: requestAttachments.map(({ name, kind, type }) => ({ name, kind, type }))
+        });
+      }
+      state.attachments = [];
+      renderAttachments();
       const assistant = { role: 'assistant', content: '' }; state.messages.push(assistant);
       promptInput.value = ''; promptInput.style.height = 'auto'; renderMessages();
       const assistantBubble = chatList.lastElementChild?.querySelector('.message-bubble');
       const controller = new AbortController(); state.controller = controller; setBusy(true);
       try {
-        assistant.content = await requestText(messageText, controller.signal, partial => {
+        assistant.content = await requestText(visiblePrompt, controller.signal, partial => {
           if (state.controller !== controller || !assistantBubble) return;
           assistant.content = partial; assistantBubble.textContent = partial; byId('workspace').scrollTop = byId('workspace').scrollHeight;
-        });
+        }, { attachments: requestAttachments });
         if (byId('voice-output').dataset.enabled === 'true') speakText(assistant.content);
       } catch (error) {
         const index = state.messages.indexOf(assistant); if (index !== -1) state.messages.splice(index, 1);
@@ -857,8 +1027,104 @@
     function exportConversation() {
       if (!state.messages.length) { toast('There is no conversation to export.', 'warn'); return; }
       const title = state.conversations.find(item => item.id === state.currentId)?.title || 'OmniStudio conversation';
-      const markdown = `# ${title}\n\n${state.messages.map(message => `## ${message.role === 'user' ? 'You' : 'OmniStudio'}\n\n${message.content}`).join('\n\n---\n\n')}\n`;
+      const markdown = `# ${title}\n\n${state.messages.map(message => {
+        const attachments = (message.attachments || []).map(file => `- Attachment: ${file.name} (${file.type || file.kind})`).join('\n');
+        return `## ${message.role === 'user' ? 'You' : 'OmniStudio'}\n\n${message.content}${attachments ? `\n\n${attachments}` : ''}`;
+      }).join('\n\n---\n\n')}\n`;
       exportText(`${safeFilename(title)}.md`, markdown); toast('Conversation exported as Markdown.');
+    }
+
+    function exportWorkspaceBackup() {
+      const backup = {
+        version: '31.1',
+        exportedAt: new Date().toISOString(),
+        conversations: state.conversations,
+        gallery: state.gallery,
+        businessDrafts: state.businessDrafts,
+        preferences: { theme: state.theme, model: state.model, persona: state.persona, font: state.font }
+      };
+      exportText(`omnistudio-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(backup, null, 2), 'application/json;charset=utf-8');
+      toast('Workspace backup exported.');
+    }
+
+    function validateWorkspaceBackup(data) {
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Backup must contain a JSON object.');
+      if (data.version !== '31.1' || !Array.isArray(data.conversations) || !Array.isArray(data.gallery) || !Array.isArray(data.businessDrafts)) throw new Error('This file is not a supported OmniStudio v31.1 backup.');
+      if (data.conversations.length > 100 || data.gallery.length > 80 || data.businessDrafts.length > 30) throw new Error('The backup contains too many saved items.');
+      const conversations = data.conversations.map(conversation => {
+        if (!conversation || typeof conversation !== 'object' || typeof conversation.id !== 'string' || typeof conversation.title !== 'string' || !Array.isArray(conversation.messages) || conversation.messages.length > 1000) throw new Error('A conversation in the backup is invalid.');
+        const messages = conversation.messages.map(message => {
+          if (!message || !['user', 'assistant'].includes(message.role) || typeof message.content !== 'string' || message.content.length > 1000000) throw new Error('A conversation message in the backup is invalid.');
+          const attachments = Array.isArray(message.attachments) ? message.attachments.slice(0, 5).map(file => {
+            if (!file || typeof file.name !== 'string' || !['image', 'text'].includes(file.kind)) throw new Error('An attachment record in the backup is invalid.');
+            return { name: file.name.slice(0, 200), kind: file.kind, type: typeof file.type === 'string' ? file.type.slice(0, 30) : file.kind };
+          }) : [];
+          return { role: message.role, content: message.content, ...(attachments.length ? { attachments } : {}) };
+        });
+        return { id: conversation.id.slice(0, 120), title: conversation.title.slice(0, 100), messages, updatedAt: Number.isFinite(conversation.updatedAt) ? conversation.updatedAt : Date.now() };
+      });
+      const gallery = data.gallery.map(item => {
+        if (!item || typeof item.url !== 'string' || typeof item.prompt !== 'string' || typeof item.id !== 'string') throw new Error('A gallery item in the backup is invalid.');
+        let url;
+        try { url = new URL(item.url); } catch { throw new Error('A gallery URL in the backup is invalid.'); }
+        if (url.protocol !== 'https:') throw new Error('Gallery URLs in the backup must use HTTPS.');
+        return { id: item.id.slice(0, 120), url: url.href, prompt: item.prompt.slice(0, 3000), createdAt: Number.isFinite(item.createdAt) ? item.createdAt : Date.now() };
+      });
+      const businessDrafts = data.businessDrafts.map(draft => {
+        const values = draft?.data;
+        if (!draft || typeof draft.id !== 'string' || !values || typeof values !== 'object' || typeof values.name !== 'string' || typeof values.industry !== 'string') throw new Error('A business draft in the backup is invalid.');
+        const outputTypes = ['business-plan', 'strategy', 'marketing', 'financial', 'swot'];
+        const languages = ['en', 'km', 'both'];
+        const cleanData = {
+          name: values.name.slice(0, 120), industry: values.industry.slice(0, 120), market: typeof values.market === 'string' ? values.market.slice(0, 180) : '',
+          budget: typeof values.budget === 'string' ? values.budget.slice(0, 120) : '', objective: typeof values.objective === 'string' ? values.objective.slice(0, 1400) : '',
+          advantages: typeof values.advantages === 'string' ? values.advantages.slice(0, 1000) : '',
+          output: outputTypes.includes(values.output) ? values.output : 'business-plan', language: languages.includes(values.language) ? values.language : 'en'
+        };
+        return { id: draft.id.slice(0, 120), data: cleanData, content: typeof draft.content === 'string' ? draft.content.slice(0, 1000000) : '', updatedAt: Number.isFinite(draft.updatedAt) ? draft.updatedAt : Date.now() };
+      });
+      const preferences = data.preferences;
+      if (!preferences || !['dark', 'light'].includes(preferences.theme) || !['auto', 'pollinations-openai', 'puter-default'].includes(preferences.model) || !Object.hasOwn(PERSONAS, preferences.persona) || !['dm', 'battambang', 'system'].includes(preferences.font)) throw new Error('The backup preferences are invalid.');
+      return { conversations, gallery, businessDrafts, preferences: { theme: preferences.theme, model: preferences.model, persona: preferences.persona, font: preferences.font } };
+    }
+
+    async function importWorkspaceBackup(file) {
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { toast('Backup files must be 5 MB or smaller.', 'warn'); return; }
+      try {
+        const backup = validateWorkspaceBackup(JSON.parse(await file.text()));
+        if (!confirm('This replaces all saved conversations, gallery items, business drafts, and preferences on this browser. Continue?')) return;
+        const entries = {
+          conversations: backup.conversations, gallery: backup.gallery, businessDrafts: backup.businessDrafts,
+          theme: backup.preferences.theme, model: backup.preferences.model, persona: backup.preferences.persona, font: backup.preferences.font
+        };
+        const previous = Object.keys(entries).map(key => [STORAGE + key, localStorage.getItem(STORAGE + key)]);
+        try {
+          Object.entries(entries).forEach(([key, value]) => localStorage.setItem(STORAGE + key, typeof value === 'string' ? value : JSON.stringify(value)));
+        } catch (error) {
+          previous.forEach(([key, value]) => value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value));
+          throw error;
+        }
+        state.conversations = backup.conversations;
+        state.gallery = backup.gallery;
+        state.businessDrafts = backup.businessDrafts;
+        state.currentId = null;
+        state.messages = [];
+        state.currentBusiness = null;
+        clearAttachments();
+        updateModel(backup.preferences.model, false);
+        updatePersona(backup.preferences.persona, false);
+        applyFont(backup.preferences.font, false);
+        state.theme = backup.preferences.theme;
+        document.documentElement.dataset.theme = state.theme;
+        byId('theme-toggle').innerHTML = state.theme === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
+        renderHistory(); renderMessages(); renderGallery(); renderBusinessDrafts(); renderStats();
+        toast('Workspace backup imported.');
+      } catch (error) {
+        toast(error?.message || 'Could not import this backup.', 'error');
+      } finally {
+        byId('backup-file-input').value = '';
+      }
     }
 
     async function generateImage() {
@@ -1214,6 +1480,14 @@
       }));
       byId('new-chat').addEventListener('click', newConversation);
       byId('export-chat').addEventListener('click', exportConversation);
+      byId('attach-image-button').addEventListener('click', () => byId('image-file-input').click());
+      byId('attach-file-button').addEventListener('click', () => byId('text-file-input').click());
+      byId('image-file-input').addEventListener('change', async event => { await addImageAttachments(Array.from(event.target.files || [])); event.target.value = ''; });
+      byId('text-file-input').addEventListener('change', async event => { await addTextAttachments(Array.from(event.target.files || [])); event.target.value = ''; });
+      byId('clear-attachments').addEventListener('click', clearAttachments);
+      byId('export-backup').addEventListener('click', exportWorkspaceBackup);
+      byId('choose-backup-file').addEventListener('click', () => byId('backup-file-input').click());
+      byId('backup-file-input').addEventListener('change', event => importWorkspaceBackup(event.target.files?.[0]));
       byId('download-image').addEventListener('click', downloadGeneratedImage);
       byId('copy-image-prompt').addEventListener('click', () => copyText(byId('generated-image').dataset.prompt || '', 'Image prompt copied.'));
       byId('generate-video').addEventListener('click', generateVideo);
