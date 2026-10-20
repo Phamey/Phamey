@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="km" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -225,7 +225,18 @@
     .stat-card strong { display: block; margin-top: 7px; color: var(--accent); font: 700 20px var(--heading); }
     .audio-card textarea { width: 100%; min-height: 150px; padding: 12px; resize: vertical; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 12px; line-height: 1.7; }
     .audio-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 11px; }
-    .audio-tools select { max-width: 220px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 10px; }
+    .audio-tools select, .audio-tools input { max-width: 220px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font-size: 10px; }
+    .media-notice { margin: 0 0 13px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--border)); border-left: 3px solid var(--warning); border-radius: 8px; color: var(--muted); background: color-mix(in srgb, var(--warning) 6%, var(--bg)); font-size: 10px; line-height: 1.7; }
+    .video-controls { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr); align-items: end; gap: 11px; margin: 14px 0; }
+    .video-controls .field select, .video-controls .field input { width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--bg); font-size: 10px; }
+    .reference-preview { width: 100%; max-width: 220px; max-height: 130px; margin-top: 8px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+    .media-player { display: block; width: 100%; margin-top: 12px; border: 1px solid var(--border); border-radius: 9px; background: #080908; }
+    .video-player { max-height: 60vh; }
+    .audio-player { min-height: 52px; }
+    .media-status { min-height: 16px; margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .media-status.error { color: var(--danger); }
+    .audio-section-title { margin: 0 0 7px; font: 700 12px var(--heading); }
+    .audio-card + .audio-card { margin-top: 12px; }
     .lightbox { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 28px; background: rgba(0, 0, 0, .9); z-index: 60; }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: min(100%, 1200px); max-height: 92vh; object-fit: contain; border-radius: 8px; }
@@ -271,6 +282,7 @@
       .page-panel { padding: 15px; margin: 9px auto; }
       .panel-topline { display: block; }
       .media-controls { margin-top: 10px; }
+      .video-controls { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .message-column { max-width: 89%; }
       .welcome { min-height: 56vh; }
@@ -291,7 +303,7 @@
       <div class="section-label">Workspace</div>
       <button class="nav-button active" type="button" data-mode="chat"><i class="fa-regular fa-comments"></i><span>Chat studio</span></button>
       <button class="nav-button" type="button" data-mode="image"><i class="fa-regular fa-image"></i><span>Image studio</span></button>
-      <button class="nav-button" type="button" data-mode="video"><i class="fa-solid fa-clapperboard"></i><span>Video storyboard</span></button>
+      <button class="nav-button" type="button" data-mode="video"><i class="fa-solid fa-clapperboard"></i><span>Video studio</span></button>
       <button class="nav-button" type="button" data-mode="audio"><i class="fa-solid fa-wave-square"></i><span>Audio studio</span></button>
       <button class="nav-button" type="button" data-mode="business"><i class="fa-solid fa-chart-pie"></i><span>Business planner</span></button>
       <button class="nav-button" type="button" data-mode="gallery"><i class="fa-regular fa-images"></i><span>Gallery</span><span class="nav-count" id="gallery-count">0</span></button>
@@ -359,16 +371,30 @@
         </section>
 
         <section class="page-panel hidden" id="video-panel">
-          <h2 class="panel-heading"><i class="fa-solid fa-clapperboard"></i>Video storyboard</h2>
-          <p class="panel-description">Turn a brief into a scene-by-scene storyboard, with shot notes and image prompts. This workspace creates a written storyboard, not a rendered video file.</p>
-          <div class="result-card hidden" id="storyboard-card"><div class="result-head"><h3>Storyboard</h3><span class="result-status" id="storyboard-status"></span></div><div class="rich-output" id="storyboard-output"></div><div class="panel-actions"><button class="secondary-action" type="button" id="export-storyboard"><i class="fa-solid fa-download"></i> Export storyboard</button><button class="secondary-action" type="button" id="storyboard-to-image"><i class="fa-regular fa-image"></i> Use brief in Image studio</button></div></div>
-          <div class="media-placeholder" id="storyboard-placeholder"><div><i class="fa-solid fa-film"></i><span>Your storyboard will appear here</span></div></div>
+          <h2 class="panel-heading"><i class="fa-solid fa-clapperboard"></i>Video studio</h2>
+          <p class="panel-description">Generate a video with Puter.js, or use the composer to create a written storyboard. Video requests can take time and may use Puter AI credits; availability and latency vary by provider.</p>
+          <div class="media-notice"><strong>Before generating:</strong> Puter AI video generation may use your Puter AI credits and can take several minutes. The provider may be unavailable or reject a model. “Stop waiting” only stops this page from waiting; provider work may continue and late results will be ignored.</div>
+          <div class="video-controls">
+            <label class="field" for="video-model"><span>Video model</span><select id="video-model"><option value="togetherai:wan-ai/wan2.7-t2v">Wan 2.7 · Text to video (default)</option><option value="wan-ai/wan2.7-t2v">Wan 2.7 · Text to video</option><option value="wan-ai/wan2.7-i2v">Wan 2.7 · Image to video</option><option value="google/veo-3.1">Google Veo 3.1</option><option value="pixverse/pixverse-v6">PixVerse v6</option></select></label>
+            <label class="field" for="video-reference"><span>Optional image reference (used with Wan I2V)</span><input id="video-reference" type="file" accept="image/*"><span class="note" id="video-reference-name">No image selected. If used for I2V, the image is sent to Puter and isn't stored by this app.</span><img id="video-reference-preview" class="reference-preview hidden" alt="Selected image-to-video reference preview"></label>
+            <div class="field"><span>Reference image</span><button class="secondary-action hidden" type="button" id="clear-video-reference"><i class="fa-solid fa-xmark"></i> Remove selected image</button></div>
+          </div>
+          <div class="panel-actions" style="justify-content:flex-start;margin:0 0 12px"><button class="primary-action" type="button" id="generate-video"><i class="fa-solid fa-clapperboard"></i> Generate AI video</button><button class="secondary-action hidden" type="button" id="stop-video-generation"><i class="fa-solid fa-stop"></i> Stop waiting</button></div>
+          <section class="result-card hidden" id="video-generation-card"><div class="result-head"><h3>Generated video</h3><span class="result-status" id="video-generation-status" role="status" aria-live="polite"></span></div><p class="media-status" id="video-generation-message"></p><video class="media-player video-player hidden" id="generated-video" controls playsinline preload="metadata" aria-label="Generated video preview"></video></section>
+          <section class="result-card hidden" id="storyboard-card"><div class="result-head"><h3>Written storyboard</h3><span class="result-status" id="storyboard-status"></span></div><div class="rich-output" id="storyboard-output"></div><div class="panel-actions"><button class="secondary-action" type="button" id="export-storyboard"><i class="fa-solid fa-download"></i> Export storyboard</button><button class="secondary-action" type="button" id="storyboard-to-image"><i class="fa-regular fa-image"></i> Use brief in Image studio</button></div></section>
+          <div class="media-placeholder" id="storyboard-placeholder"><div><i class="fa-solid fa-film"></i><span>Your written storyboard will appear here</span></div></div>
         </section>
 
         <section class="page-panel hidden" id="audio-panel">
           <h2 class="panel-heading"><i class="fa-solid fa-wave-square"></i>Audio studio</h2>
-          <p class="panel-description">Listen to text with your browser's built-in speech synthesis. Available voices depend on your device and browser; this does not create a downloadable audio file.</p>
-          <div class="audio-card"><label class="field"><span class="section-label" style="padding:0">Text to speak</span><textarea id="speech-text" maxlength="5000" placeholder="Enter text to preview as speech, or load the latest assistant response..."></textarea></label><div class="audio-tools"><select id="speech-voice" aria-label="Speech voice"></select><button class="primary-action" type="button" id="speak-button"><i class="fa-solid fa-play"></i> Play preview</button><button class="secondary-action" type="button" id="stop-speech"><i class="fa-solid fa-stop"></i> Stop</button><button class="secondary-action" type="button" id="use-latest-answer"><i class="fa-regular fa-message"></i> Use latest answer</button></div><p class="note" id="voice-note">Voice and language support varies by browser. Your device performs this preview.</p></div>
+          <p class="panel-description">Generate playable speech audio with Puter.js, or use the separate browser voice preview. Provider availability, latency, supported voices, and possible Puter AI credit use vary.</p>
+          <div class="media-notice"><strong>Before generating:</strong> Puter.js speech generation may use Puter AI credits and takes place through the provider. The browser preview below is a separate local feature and does not create an audio file.</div>
+          <div class="audio-card">
+            <label class="field"><span class="section-label" style="padding:0">Text to generate or preview</span><textarea id="speech-text" maxlength="5000" placeholder="Enter text to speak, or load the latest assistant response..."></textarea></label>
+            <div class="audio-tools"><label class="field"><span>Speech language</span><select id="speech-language" aria-label="Generated speech language"><option value="en-US">English (US)</option><option value="en-GB">English (UK)</option><option value="km-KH">Khmer</option><option value="th-TH">Thai</option></select></label><label class="field"><span>Voice (optional)</span><input id="puter-speech-voice" type="text" maxlength="80" placeholder="Use provider default"></label><button class="primary-action" type="button" id="generate-audio"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate with Puter AI</button><button class="secondary-action hidden" type="button" id="stop-audio-generation"><i class="fa-solid fa-stop"></i> Stop waiting</button></div>
+            <p class="media-status" id="audio-generation-status" role="status" aria-live="polite">Ready to generate.</p><audio class="media-player audio-player hidden" id="generated-audio" controls preload="metadata" aria-label="Generated speech audio"></audio>
+          </div>
+          <div class="audio-card browser-voice-card"><h3 class="audio-section-title">Browser voice preview</h3><p class="note">Uses SpeechSynthesis voices installed in your browser or device. This preview is not sent to Puter and is not saved as an audio file.</p><div class="audio-tools"><select id="speech-voice" aria-label="Browser speech voice"></select><button class="primary-action" type="button" id="speak-button"><i class="fa-solid fa-play"></i> Play browser preview</button><button class="secondary-action" type="button" id="stop-speech"><i class="fa-solid fa-stop"></i> Stop preview</button><button class="secondary-action" type="button" id="use-latest-answer"><i class="fa-regular fa-message"></i> Use latest answer</button></div><p class="note" id="voice-note">Browser voice and language support varies by device.</p></div>
         </section>
 
         <section class="page-panel hidden" id="business-panel">
@@ -466,6 +492,10 @@
       currentBusiness: null,
       currentStoryboard: '',
       controller: null,
+      providerMediaRequest: null,
+      providerMediaSequence: 0,
+      videoReferenceFile: null,
+      videoReferenceUrl: '',
       speaking: false,
       theme: localStorage.getItem(STORAGE + 'theme') || 'dark',
       model: localStorage.getItem(STORAGE + 'model') || 'auto',
@@ -475,7 +505,7 @@
     const byId = id => document.getElementById(id);
     const promptInput = byId('prompt-input');
     const chatList = byId('chat-list');
-    const modeLabels = { chat: 'Chat studio', image: 'Image studio', video: 'Video storyboard', audio: 'Audio studio', business: 'Business planner', gallery: 'Gallery', library: 'Prompt library', settings: 'Settings & stats' };
+    const modeLabels = { chat: 'Chat studio', image: 'Image studio', video: 'Video studio', audio: 'Audio studio', business: 'Business planner', gallery: 'Gallery', library: 'Prompt library', settings: 'Settings & stats' };
 
     function readStored(key, fallback) {
       try {
@@ -508,8 +538,9 @@
       byId('status-label').textContent = busy ? label : 'Ready';
       button.classList.toggle('stop', busy);
       button.innerHTML = busy ? '<i class="fa-solid fa-stop"></i>' : '<i class="fa-solid fa-arrow-up"></i>';
-      button.setAttribute('aria-label', busy ? 'Stop generation' : 'Send prompt');
-      button.title = busy ? 'Stop generation' : 'Send prompt';
+      const stopLabel = state.providerMediaRequest ? 'Stop waiting locally' : 'Stop generation';
+      button.setAttribute('aria-label', busy ? stopLabel : 'Send prompt');
+      button.title = busy ? stopLabel : 'Send prompt';
     }
 
     function showMode(mode) {
@@ -526,8 +557,8 @@
       ['image', 'video', 'audio', 'business', 'gallery', 'library', 'settings'].forEach(name => byId(name + '-panel').classList.toggle('hidden', mode !== name));
       byId('input-dock').classList.toggle('hidden', !['chat', 'image', 'video'].includes(mode));
       byId('quick-prompts').classList.toggle('hidden', mode !== 'chat');
-      promptInput.placeholder = mode === 'image' ? 'Describe the image you want to create…' : mode === 'video' ? 'Describe the video idea for a scene-by-scene storyboard…' : 'Ask OmniStudio anything…';
-      byId('composer-hint').textContent = mode === 'image' ? 'Images are requested from Pollinations and may take a little while to load.' : mode === 'video' ? 'Creates a written storyboard only; no video file is rendered.' : 'Enter to send · Shift + Enter for a new line · Service availability may vary';
+      promptInput.placeholder = mode === 'image' ? 'Describe the image you want to create…' : mode === 'video' ? 'Describe the video idea for a written storyboard…' : 'Ask OmniStudio anything…';
+      byId('composer-hint').textContent = mode === 'image' ? 'Images are requested from Pollinations and may take a little while to load.' : mode === 'video' ? 'Enter here to create a written storyboard; use Generate AI video above for video output.' : 'Enter to send · Shift + Enter for a new line · Service availability may vary';
       if (mode === 'gallery') renderGallery();
       if (mode === 'business') renderBusinessDrafts();
       if (mode === 'library') renderLibrary();
@@ -625,13 +656,13 @@
     }
 
     function newConversation() {
-      if (state.controller) { state.controller.abort(); state.controller = null; setBusy(false); }
+      if (state.controller) cancelGeneration();
       state.currentId = null; state.messages = []; promptInput.value = ''; promptInput.style.height = 'auto'; renderMessages(); showMode('chat'); renderHistory();
     }
 
     function systemInstruction() {
       const persona = PERSONAS[state.persona] || PERSONAS.general;
-      return `${persona} Answer in the language the user uses, unless they ask otherwise. Be clear about uncertainty. Do not claim access to current live data. Label estimates and avoid inventing facts or statistics.`;
+      return `${persona} Always respond in Khmer unless the user explicitly requests another language. Be clear about uncertainty. Do not claim access to current live data. Label estimates and avoid inventing facts or statistics.`;
     }
 
     function selectedProvider() { return byId('model-select').value || 'auto'; }
@@ -873,6 +904,166 @@
       catch { window.open(image.dataset.url, '_blank', 'noopener,noreferrer'); toast('Opened the image source in a new tab; direct download was unavailable.', 'warn'); }
     }
 
+    function releaseProviderElement(element) {
+      if (!element || !['VIDEO', 'AUDIO'].includes(element.tagName)) return;
+      try { element.pause(); } catch {}
+      element.removeAttribute('src');
+      element.querySelectorAll('source').forEach(source => source.remove());
+      try { element.load(); } catch {}
+    }
+
+    function clearGeneratedPlayer(kind) {
+      const player = byId(kind === 'video' ? 'generated-video' : 'generated-audio');
+      if (!player) return;
+      releaseProviderElement(player);
+      player.classList.add('hidden');
+    }
+
+    function attachProviderPlayer(kind, result) {
+      const isVideo = kind === 'video';
+      const MediaElement = isVideo ? HTMLVideoElement : HTMLAudioElement;
+      if (!MediaElement || !(result instanceof MediaElement)) throw new Error(`Puter.js did not return a playable ${kind} element.`);
+      const id = isVideo ? 'generated-video' : 'generated-audio';
+      const previous = byId(id);
+      result.id = id;
+      result.className = `media-player ${isVideo ? 'video-player' : 'audio-player'}`;
+      result.controls = true;
+      result.preload = 'metadata';
+      if (isVideo) result.playsInline = true;
+      result.setAttribute('aria-label', isVideo ? 'Generated video preview' : 'Generated speech audio');
+      previous.replaceWith(result);
+      result.classList.remove('hidden');
+      return result;
+    }
+
+    function setVideoReference(file) {
+      if (state.videoReferenceUrl) URL.revokeObjectURL(state.videoReferenceUrl);
+      state.videoReferenceFile = null;
+      state.videoReferenceUrl = '';
+      byId('clear-video-reference').classList.add('hidden');
+      byId('video-reference-preview').classList.add('hidden');
+      byId('video-reference-preview').removeAttribute('src');
+      if (!file) {
+        byId('video-reference-name').textContent = 'No image selected. If used for I2V, the image is sent to Puter and isn’t stored by this app.';
+        byId('clear-video-reference').classList.add('hidden');
+        return;
+      }
+      const supportedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+      if (!supportedTypes.includes(file.type) || file.size > 10 * 1024 * 1024) {
+        byId('video-reference').value = '';
+        byId('video-reference-name').textContent = 'Choose a PNG, JPEG, WebP, or GIF image up to 10 MB.';
+        toast(file.size > 10 * 1024 * 1024 ? 'Video reference images must be 10 MB or smaller.' : 'Choose a PNG, JPEG, WebP, or GIF image.', 'warn');
+        return;
+      }
+      state.videoReferenceFile = file;
+      state.videoReferenceUrl = URL.createObjectURL(file);
+      byId('video-reference-preview').src = state.videoReferenceUrl;
+      byId('video-reference-preview').classList.remove('hidden');
+      byId('video-reference-name').textContent = `${file.name} · used only with an image-to-video model`;
+      byId('clear-video-reference').classList.remove('hidden');
+    }
+
+    async function generateVideo() {
+      const brief = promptInput.value.trim();
+      if (!brief) { toast('Describe the video in the composer first.', 'warn'); promptInput.focus(); return; }
+      if (state.providerMediaRequest || state.controller) { toast('A request is already in progress.', 'warn'); return; }
+      if (!window.puter?.ai?.txt2vid) {
+        byId('video-generation-card').classList.remove('hidden');
+        byId('video-generation-status').textContent = 'Unavailable';
+        byId('video-generation-message').textContent = 'Puter.js video generation is unavailable. Check connectivity and try again later.';
+        toast('Puter.js video generation is unavailable.', 'error');
+        return;
+      }
+      const model = byId('video-model').value;
+      const isImageToVideo = model === 'wan-ai/wan2.7-i2v';
+      if (isImageToVideo && !state.videoReferenceFile) {
+        toast('Select an image reference to use the Wan image-to-video model.', 'warn');
+        byId('video-reference').focus();
+        return;
+      }
+      const prompt = brief.slice(0, 8000);
+      const controller = new AbortController();
+      const request = { id: ++state.providerMediaSequence, kind: 'video', controller };
+      state.providerMediaRequest = request;
+      state.controller = controller;
+      promptInput.value = '';
+      promptInput.style.height = 'auto';
+      clearGeneratedPlayer('video');
+      byId('video-generation-card').classList.remove('hidden');
+      byId('video-generation-status').textContent = 'Generating…';
+      byId('video-generation-message').classList.remove('error');
+      byId('video-generation-message').textContent = 'Puter.js is processing the video request. This can take several minutes.';
+      byId('stop-video-generation').classList.remove('hidden');
+      setBusy(true, 'Generating video');
+      const options = { model };
+      if (isImageToVideo) options.input_reference = state.videoReferenceFile;
+      try {
+        const result = await window.puter.ai.txt2vid(prompt, options);
+        if (state.providerMediaRequest !== request) { releaseProviderElement(result); return; }
+        attachProviderPlayer('video', result);
+        byId('video-generation-status').textContent = 'Ready';
+        byId('video-generation-message').textContent = 'Video generated by Puter.js. Use the player controls to preview it.';
+        toast('Video generation completed.');
+      } catch (error) {
+        if (state.providerMediaRequest !== request) return;
+        byId('video-generation-status').textContent = 'Generation failed';
+        byId('video-generation-message').textContent = error?.message || 'The video provider could not complete this request.';
+        byId('video-generation-message').classList.add('error');
+        toast('Video generation failed. Provider availability and model support may vary.', 'error');
+      } finally {
+        if (state.providerMediaRequest === request) {
+          state.providerMediaRequest = null;
+          if (state.controller === controller) state.controller = null;
+          byId('stop-video-generation').classList.add('hidden');
+          setBusy(false);
+        }
+      }
+    }
+
+    async function generateSpeechAudio() {
+      const text = byId('speech-text').value.trim();
+      if (!text) { toast('Enter text to generate audio first.', 'warn'); byId('speech-text').focus(); return; }
+      if (state.providerMediaRequest || state.controller) { toast('A request is already in progress.', 'warn'); return; }
+      if (!window.puter?.ai?.txt2speech) {
+        byId('audio-generation-status').textContent = 'Puter.js speech generation is unavailable. Check connectivity and try again later.';
+        byId('audio-generation-status').classList.add('error');
+        toast('Puter.js speech generation is unavailable.', 'error');
+        return;
+      }
+      const controller = new AbortController();
+      const request = { id: ++state.providerMediaSequence, kind: 'audio', controller };
+      state.providerMediaRequest = request;
+      state.controller = controller;
+      clearGeneratedPlayer('audio');
+      byId('audio-generation-status').classList.remove('error');
+      byId('audio-generation-status').textContent = 'Generating audio… This can take a while; provider latency varies.';
+      byId('stop-audio-generation').classList.remove('hidden');
+      setBusy(true, 'Generating speech');
+      const options = { language: byId('speech-language').value };
+      const voice = byId('puter-speech-voice').value.trim();
+      if (voice) options.voice = voice;
+      try {
+        const result = await window.puter.ai.txt2speech(text.slice(0, 5000), options);
+        if (state.providerMediaRequest !== request) { releaseProviderElement(result); return; }
+        attachProviderPlayer('audio', result);
+        byId('audio-generation-status').classList.remove('error');
+        byId('audio-generation-status').textContent = 'Audio ready. Use the player controls to listen.';
+        toast('Speech audio generated.');
+      } catch (error) {
+        if (state.providerMediaRequest !== request) return;
+        byId('audio-generation-status').classList.add('error');
+        byId('audio-generation-status').textContent = error?.message || 'The speech provider could not complete this request.';
+        toast('Speech audio generation failed. Provider availability and voice support may vary.', 'error');
+      } finally {
+        if (state.providerMediaRequest === request) {
+          state.providerMediaRequest = null;
+          if (state.controller === controller) state.controller = null;
+          byId('stop-audio-generation').classList.add('hidden');
+          setBusy(false);
+        }
+      }
+    }
+
     async function generateStoryboard() {
       const brief = promptInput.value.trim(); if (!brief || state.controller) { if (!brief) toast('Describe the video idea first.', 'warn'); return; }
       promptInput.value = ''; promptInput.style.height = 'auto'; const controller = new AbortController(); state.controller = controller; setBusy(true, 'Building storyboard');
@@ -965,8 +1156,31 @@
       try { recognition.start(); toast('Listening…'); } catch { toast('Could not start voice input.', 'warn'); }
     }
 
+    function stopMediaRequest(kind) {
+      const request = state.providerMediaRequest;
+      if (!request || (kind && request.kind !== kind)) return false;
+      state.providerMediaRequest = null;
+      if (state.controller === request.controller) state.controller = null;
+      setBusy(false);
+      const isVideo = request.kind === 'video';
+      const statusId = isVideo ? 'video-generation-status' : 'audio-generation-status';
+      const messageId = isVideo ? 'video-generation-message' : 'audio-generation-status';
+      const buttonId = isVideo ? 'stop-video-generation' : 'stop-audio-generation';
+      byId(buttonId).classList.add('hidden');
+      const message = 'Stopped waiting locally. The provider request may continue; any late result will be ignored.';
+      if (isVideo) {
+        byId(statusId).textContent = 'Stopped locally';
+        byId(messageId).textContent = message;
+      } else {
+        byId(statusId).textContent = message;
+      }
+      toast('Stopped waiting locally. Puter may continue processing and could still use credits.', 'warn');
+      return true;
+    }
+
     function cancelGeneration() {
-      if (state.controller) { state.controller.abort(); state.controller = null; setBusy(false); toast('Generation stopped.', 'warn'); }
+      if (state.providerMediaRequest && stopMediaRequest(state.providerMediaRequest.kind)) return;
+      if (state.controller) { state.controller.abort(); state.controller = null; setBusy(false); toast('Stopped the current request where supported.', 'warn'); }
     }
 
     function commandActions() {
@@ -1002,6 +1216,12 @@
       byId('export-chat').addEventListener('click', exportConversation);
       byId('download-image').addEventListener('click', downloadGeneratedImage);
       byId('copy-image-prompt').addEventListener('click', () => copyText(byId('generated-image').dataset.prompt || '', 'Image prompt copied.'));
+      byId('generate-video').addEventListener('click', generateVideo);
+      byId('stop-video-generation').addEventListener('click', () => stopMediaRequest('video'));
+      byId('video-reference').addEventListener('change', event => setVideoReference(event.target.files?.[0] || null));
+      byId('clear-video-reference').addEventListener('click', () => { byId('video-reference').value = ''; setVideoReference(null); });
+      byId('generate-audio').addEventListener('click', generateSpeechAudio);
+      byId('stop-audio-generation').addEventListener('click', () => stopMediaRequest('audio'));
       byId('sidebar-toggle').addEventListener('click', toggleSidebar);
       byId('sidebar-scrim').addEventListener('click', closeSidebar);
       byId('settings-shortcut').addEventListener('click', () => showMode('settings'));
@@ -1048,6 +1268,7 @@
         else if (event.key === 'Escape') { byId('lightbox').classList.remove('open'); closeSidebar(); if (state.controller) cancelGeneration(); }
       });
       if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = refreshVoices;
+      window.addEventListener('beforeunload', () => { if (state.videoReferenceUrl) URL.revokeObjectURL(state.videoReferenceUrl); });
     }
 
     document.documentElement.dataset.theme = state.theme;
